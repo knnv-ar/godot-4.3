@@ -861,83 +861,366 @@ Sobre la base de la lección anterior, [Creando tu primer script](#creando-tu-pr
 
 ![godot-moving-with-input](img/scripting_first_script_moving_with_input.webp)
 
----
-SEGUIR POR ACÁ EN: https://docs.godotengine.org/en/stable/getting_started/step_by_step/scripting_player_input.html
----
+Tenés dos herramientas principales para procesar el input del jugador en Godot:
 
-Tiene dos herramientas principales para procesar la entrada del jugador en Godot:
+1. Los **built-in input callbacks** (funciones de retroalimentación de entrada integradas), principalmente `_unhandled_input()`. Al igual que `_process()`, es una función virtual integrada que Godot llama cada vez que el jugador presiona una tecla. Es la herramienta que desea utilizar para reaccionar a eventos que no ocurren en cada cuadro, como por ejemplo presionar la barra espaciadora para saltar.
 
-Las devoluciones de llamadas de entrada integradas, principalmente _unhandled_input(). Al igual que _process(), es una función virtual integrada que Godot llama cada vez que el jugador presiona una tecla. Es la herramienta que desea utilizar para reaccionar a eventos que no ocurren en cada cuadro, como presionar la barra espaciadora para saltar. Para obtener más información sobre las devoluciones de llamadas de entrada, consulte Uso de InputEvent.
+2. El **singleton** `Input`. Un singleton es un objeto de acceso global. Godot proporciona acceso a varios de estos objetos en los scripts. Es la herramienta adecuada para verificar la entrada en cada cuadro.
 
-El singleton de entrada. Un singleton es un objeto de acceso global. Godot proporciona acceso a varios en los scripts. Es la herramienta adecuada para verificar la entrada en cada cuadro.
+Vamos a utilizar el singleton `Input` aquí, ya que necesitamos saber si el jugador quiere girar o moverse _en cada cuadro_.
 
-Vamos a utilizar el singleton Input aquí, ya que necesitamos saber si el jugador quiere girar o moverse en cada cuadro.
+Para girar, deberíamos utilizar una nueva variable: `direction`. En nuestra función `_process()`, reemplaza la línea `rotation += angular_speed * delta` con el código que se muestra a continuación:
 
-Para girar, deberíamos utilizar una nueva variable: direction. En nuestra función _process(), reemplaza la línea rotation += angular_speed * delta con el código que se muestra a continuación.
-
+```
 var direction = 0
 if Input.is_action_pressed("ui_left"):
-direction = -1
+	direction = -1
 if Input.is_action_pressed("ui_right"):
-direction = 1
+	direction = 1
 
 rotation += angular_speed * direction * delta
+```
 
-Nuestra variable local direction es un multiplicador que representa la dirección en la que el jugador quiere girar. Un valor de 0 significa que el jugador no está presionando la tecla de flecha izquierda o derecha. Un valor de 1 significa que el jugador quiere girar a la derecha y -1 significa que quiere girar a la izquierda.
+Nuestra variable local `direction` es un multiplicador que representa la dirección en la que el jugador quiere girar. Un valor de `0` significa que el jugador no está presionando la tecla de flecha izquierda o derecha. Un valor de `1` significa que el jugador quiere girar a la derecha y `-1` significa que quiere girar a la izquierda.
 
-Para producir estos valores, introducimos condiciones y el uso de Input. Una condición comienza con la palabra clave if en GDScript y termina con dos puntos. La condición es la expresión entre la palabra clave y el final de la línea.
+Para producir estos valores, introducimos condiciones y el uso de `Input`. Una condición comienza con la palabra clave `if` en GDScript y termina con `dos puntos (:)`. La condición es la expresión entre la palabra clave y el final de la línea.
 
-Para comprobar si se presionó una tecla en este cuadro, llamamos a Input.is_action_pressed(). El método toma una cadena de texto que representa una acción de entrada y devuelve verdadero si se presionó la acción, falso en caso contrario.
+Para comprobar si se presionó una tecla en este cuadro, llamamos a `Input.is_action_pressed()`. El método toma una cadena de texto que representa una acción de entrada y devuelve `true` si se presionó la acción, `false` en caso contrario.
 
-Las dos acciones que usamos arriba, "ui_left" y "ui_right", están predefinidas en cada proyecto de Godot. Se activan respectivamente cuando el jugador presiona las flechas izquierda y derecha en el teclado o izquierda y derecha en el D-pad de un gamepad.
+Las dos acciones que usamos arriba, `ui_left` y `ui_right`, están predefinidas en cada proyecto de Godot. Se activan respectivamente cuando el jugador presiona las flechas izquierda y derecha en el teclado o izquierda y derecha en el D-pad de un gamepad.
 
-Nota
+> **Nota:** Puedes ver y editar las acciones de entrada en tu proyecto yendo a `Project > Project Settings` y haciendo clic en la pestaña `Input Map`.
 
-Puedes ver y editar las acciones de entrada en tu proyecto yendo a Proyecto -> Configuración del proyecto y haciendo clic en la pestaña Mapa de entrada.
+Por último, usamos `direction` como multiplicador cuando actualizamos la variable `rotation` del nodo: `rotation += angular_speed * direction * delta`.
 
-Por último, usamos la dirección como multiplicador cuando actualizamos la rotación del nodo: rotación += velocidad_angular * dirección * delta.
+Comente las líneas `var velocity = Vector2.UP.rotated(rotation) * speed` y `position += velocity * delta` de esta manera:
 
-Comente las líneas var velocity = Vector2.UP.rotated(rotation) * speed y position += velocity * delta de esta manera:
-
+```
 #var velocity = Vector2.UP.rotated(rotation) * speed
 
 #position += velocity * delta
+```
 
-Esto ignorará el código que movió la posición del ícono en un círculo sin la intervención del usuario del ejercicio anterior.
+Esto **ignorará** el código que movió la posición del ícono en un círculo sin la intervención del usuario del ejercicio anterior.
 
-Si ejecuta la escena con este código, el ícono debería rotar cuando presione Izquierda y Derecha.
+Si ejecuta la escena con este código, el ícono debería rotar cuando presione las flechas `Left` y `Right`.
 
----
+#### Movimiento al presionar la tecla "Up"
 
-Seguir en: https://docs.godotengine.org/en/stable/getting_started/step_by_step/scripting_player_input.html
+Para movernos solo al presionar una tecla `Up`, necesitamos modificar el código que calcula la velocidad. Quita los comentarios del código y reemplaza la línea que comienza con `var velocity` por el código que se muestra a continuación:
 
+```
+var velocity = Vector2.ZERO
+if Input.is_action_pressed("ui_up"):
+	velocity = Vector2.UP.rotated(rotation) * speed
+```
 
+Inicializamos `velocity` con un valor de `Vector2.ZERO`, otra constante del tipo _Vector_ incorporado que representa un vector 2D de longitud 0.
 
+Si el jugador presiona la tecla `ui_up`, entonces actualizamos el valor de la velocidad, lo que hace que el sprite se mueva hacia adelante.
 
+#### Script completo
 
+A continuación se incluye el archivo `sprite_2d.gd` completo como referencia:
 
+```
+extends Sprite2D
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+var speed = 400
+var angular_speed = PI
 
 
+func _process(delta):
+	var direction = 0
+	if Input.is_action_pressed("ui_left"):
+		direction = -1
+	if Input.is_action_pressed("ui_right"):
+		direction = 1
+
+	rotation += angular_speed * direction * delta
+
+	var velocity = Vector2.ZERO
+	if Input.is_action_pressed("ui_up"):
+		velocity = Vector2.UP.rotated(rotation) * speed
+
+	position += velocity * delta
+```
+
+Si ejecuta la escena, ahora debería poder rotar con las teclas de flecha izquierda y derecha y avanzar presionando `Up`.
+
+![godot-icon-moving-up](img/scripting_first_script_moving_with_input.webp)
+
+#### Resumen
+
+En resumen, cada script en Godot representa una _clase_ y _extiende_ una de las clases integradas del motor. Los tipos de nodos de los que _heredan_ tus clases te dan acceso a _propiedades_, como `rotation` y `position` en el caso de nuestro sprite. También heredas muchas funciones, que no pudimos usar en este ejemplo.
+
+En GDScript, las _variables_ que colocas en la parte superior del archivo son las propiedades de tu clase, también llamadas _variables miembro_. Además de las variables, puedes definir _funciones_, que, en su mayor parte, serán los métodos de tus clases.
+
+Godot proporciona varias _funciones virtuales_ que puedes definir para conectar tu clase con el motor. Estas incluyen `_process()`, para aplicar cambios al nodo en cada cuadro, y `_unhandled_input()`, para recibir eventos de entrada como pulsaciones de teclas y botones de los usuarios. Hay bastantes más.
+
+El _singleton_ `Input` te permite reaccionar a la entrada de los jugadores en cualquier parte de tu código. En particular, podrás usarlo en el bucle `_process()`.
+
+En la próxima lección, [Uso de señales](#uso-de-señales), desarrollaremos la relación entre scripts y nodos haciendo que nuestros nodos activen código en scripts.
+
+### Uso de señales
+
+En esta lección, veremos las **signals** (señales). Son mensajes que emiten los nodos cuando les sucede algo específico, por ejemplo: como cuando se presiona un botón. Otros nodos pueden conectarse a esa señal y llamar a una función cuando ocurre el evento.
+
+Las señales son un mecanismo de delegación integrado en Godot que permite que un objeto de juego reaccione a un cambio en otro sin que se hagan referencia entre sí. El uso de señales limita el acoplamiento y mantiene la flexibilidad del código.
+
+Por ejemplo, puede tener una barra de vida en la pantalla que represente la salud del jugador. Cuando el jugador recibe daño o usa una poción curativa, desea que la barra refleje el cambio. Para poder hacerlo en Godot, se usan señales.
+
+Desde Godot 4.0, los métodos (`Callable`) y las señales son un tipo de primera clase. Esto significa que puede pasarlas como argumentos de método directamente sin tener que pasarlas como cadenas, lo que permite un mejor autocompletado y es menos propenso a errores. Consulte la referencia de la clase `Signal` para obtener una lista de lo que puede hacer con el tipo `Signal` directamente.
+
+> **Consulte también:** Como mencionamos en la introducción, las señales son la versión de Godot del patrón observador. Puede obtener más información sobre esto en [Patrones de programación de juegos](https://gameprogrammingpatterns.com/observer.html).
+
+Ahora usaremos una señal para hacer que nuestro ícono de Godot de la lección anterior [Escuchando el input del jugador](#escuchando-el-input-del-jugador) se mueva y se detenga al presionar un botón.
+
+> **Nota:** Para este proyecto, seguiremos las convenciones de nomenclatura de Godot.
+>
+> - **GDScript:** las clases (nodos) usan **PascalCase**, las variables y funciones usan `snake_case` y las constantes usan `ALL_CAPS` (consulte [la guía de estilo de GDScript](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html#doc-gdscript-styleguide)).
+>
+> - **C#:** las clases, las variables de exportación y los métodos usan `PascalCase`, los campos privados usan `_camelCase`, las variables locales y los parámetros usan `camelCase` (consulte la [guía de estilo de C#](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_style_guide.html#doc-c-sharp-styleguide)). Tenga cuidado de escribir los nombres de los métodos de forma precisa para evitar problemas al conectar las señales.
+
+#### Configuración de la escena
+
+Para agregar un **botón** a nuestro juego, crearemos una nueva escena que incluirá tanto un `Button` como la escena `sprite_2d.tscn` que creamos en la lección [Creando tu primer script](#creando-tu-primer-script).
+
+1. Crea una nueva escena yendo al menú `Scene > New Scene`.
+
+    ![new-scene](img/signals_01_new_scene.webp)
+
+2. En el dock **Scene**, haz clic en el botón **2D Scene**. Esto agregará un _Node2D_ como raíz.
+
+    ![2d-scene](img/signals_02_2d_scene.webp)
+
+3. En el dock **FileSystem**, haz clic y arrastra el archivo `sprite_2d.tscn` que guardaste anteriormente sobre el _Node2D_ para crear una instancia del mismo.
+
+    ![new-instance](img/signals_03_dragging_scene.webp)
+
+4. Queremos agregar otro nodo como hermano del _Sprite2D_. Para hacerlo, haz clic derecho en **Node2D** y selecciona `Add Child Node`.
+
+    ![add-child-node](img/signals_04_add_child_node.webp)
+
+5. Busca el nodo `Button` y agrégalo.
+
+    ![add-button](img/signals_05_add_button.webp)
+
+6. De manera predeterminada el nodo es pequeño. Haz clic y arrastra el controlador inferior derecho del botón en la ventana gráfica para cambiar su tamaño:
+
+    ![drag-button](img/signals_06_drag_button.webp)
+
+7. Si no ves los controladores, asegúrate de que la herramienta de selección `Select Mode (Q)` esté activa en la barra de herramientas. Haz clic y arrastra `Button` para acercarlo al sprite.
+
+    ![select-tool](img/signals_07_select_tool.webp)
+
+8. También puedes escribir una etiqueta en `Button` editando su propiedad `Text` en `Inspector`. Ingresa `Toggle motion`.
+
+    ![toggle-motion-text](img/signals_08_toggle_motion_text.webp)
+
+9. Tu ​​árbol de escena y ventana gráfica deberían verse así.
+
+    ![scene-setup](img/signals_09_scene_setup.webp)
+
+Guarda la escena que acabas de crear como `node_2d.tscn`, si aún no lo has hecho. Luego, puedes ejecutarla con `F6` (`Cmd + R` en macOS). En este momento, el botón estará visible, pero no sucederá nada si lo presionas.
+
+#### Conexión de una señal en el editor
+
+Aquí queremos conectar la señal `pressed` de `Button` con nuestro _Sprite2D_ y llamar a una nueva función que activará o desactivará su movimiento. Necesitamos tener un script adjunto al nodo _Sprite2D_, lo cual hicimos en la lección anterior
+
+10. Las señales pueden ser conectadas en el panel **Node**. ​​Seleccione el nodo `Button` y, en el lado derecho del editor, haga clic en la pestaña denominada **Node** junto al **Inspector**.
+
+    ![select-tool](img/signals_10_node_dock.webp)
+
+11. El dock muestra una _lista de señales disponibles_ para el nodo seleccionado. Haga doble clic en la señal `pressed()` para abrir la ventana `Connect a Signal to a Method`.
+
+    ![select-tool](img/signals_11_pressed_signals.webp)
+
+12. Aquí puedes conectar la señal al nodo `Sprite2D`. El nodo necesita un _método receptor_, una función que Godot llamará cuando el botón emita la señal. El editor genera uno para ti. Por convención, llamamos a estos métodos de devolución de llamada **_on_node_name_signal_name**. Aquí, será `_on_button_pressed`:
+
+    ![select-tool](img/signals_12_node_connection.webp)
+
+> **Nota:** Al conectar señales a través del dock `Node` del editor, puedes usar dos modos. El modo _simple_ solo te permite conectarte a nodos que tengan un script adjunto y crea una nueva función de devolución de llamada (callback) en ellos.
+>
+>    ![select-tool](img/signals_advanced_connection_window.webp)
+>
+> La modo _avanzado_ te permite conectarte a cualquier nodo y a cualquier función incorporada, agregar argumentos a la devolución de llamada y configurar opciones. Puedes alternar el modo en la parte inferior derecha de la ventana haciendo clic en el botón `Advanced`.
+
+> **Nota:** Si estás usando un editor externo (como VS Code), es posible que esta generación automática de código no funcione. En este caso, debes conectar la señal a través del código como se explica en la siguiente sección [Conexión de una señal mediante código](#conexión-de-una-señal-mediante-código).
+
+13. Luego de seleccionar el nodo `Sprite2D`, clic en el botón `Connect` para completar la conexión de la señal y saltar al espacio de trabajo de **Script**. Deberías ver el nuevo método con un **ícono de conexión** en el margen izquierdo.
+
+    ![select-tool](img/signals_13_signals_connection_icon.webp)
+
+14. Si haces clic en el **ícono de conexión**, aparece la ventana **Connections to method** que muestra información sobre la conexión. Esta función solo está disponible cuando se conectan nodos en el editor.
+
+    ![select-tool](img/signals_14_signals_connection_info.webp)
+
+Reemplacemos la línea con la palabra clave `pass` con el código que alternará el movimiento del nodo.
+
+Nuestro `Sprite2D` se mueve gracias al código en la función `_process()`. Godot proporciona un método para activar y desactivar el procesamiento: `Node.set_process()`. Otro método de la clase **Node**, `is_processing()`, devuelve `true` si el procesamiento inactivo está activo. Podemos usar la palabra clave `not` para invertir el valor.
+
+```
+func _on_button_pressed():
+	set_process(not is_processing())
+```
+
+Esta función activará y desactivará el procesamiento y, a su vez, el movimiento del ícono al presionar el botón.
+
+Antes de probar el juego, debemos simplificar nuestra función `_process()` para mover el nodo automáticamente y no esperar la entrada del usuario. Reemplácela con el siguiente código, que vimos hace dos lecciones:
+
+```
+func _process(delta):
+	rotation += angular_speed * delta
+	var velocity = Vector2.UP.rotated(rotation) * speed
+	position += velocity * delta
+```
+
+El código `sprite_2d.gd` completo debería verse como el siguiente.
+
+```
+extends Sprite2D
+
+var speed = 400
+var angular_speed = PI
+
+func _process(delta):
+	rotation += angular_speed * delta
+	var velocity = Vector2.UP.rotated(rotation) * speed
+	position += velocity * delta
+
+func _on_button_pressed():
+	set_process(not is_processing())
+```
+
+Ejecute la escena (`F6`) ahora y haga clic en el botón para ver cómo se detiene o se reinicia el movimiento del sprite.
+
+#### Conexión de una señal mediante código
+
+Puedes conectar señales mediante código en lugar de usar el editor. Esto es necesario cuando creas _nodos_ o cuando realizas _instanciación_ de escenas dentro de un script.
+
+Usemos un nodo diferente aquí. Godot tiene un nodo `Timer` que es útil para implementar tiempos de recuperación de habilidades, recarga de armas y más.
+
+Regresa al espacio de trabajo **2D**. Puedes hacer clic en el texto **2D** en la parte superior de la ventana o presionar `Ctrl + F1` (`Ctrl + Cmd + 1` en macOS).
+
+En el dock **Scene**, haz clic derecho en el nodo `Sprite2D` y agrega un nuevo nodo hijo. Busca `Timer` y agrega el nodo correspondiente. Tu escena ahora debería verse así:
+
+![scene-tree](img/signals_15_scene_tree.webp)
+
+Con el nodo `Timer` seleccionado, ve al **Inspector** y habilita la propiedad `Autostart`.
+
+![timer](img/signals_18_timer_autostart.webp)
+
+Haga clic en el icono de script junto al nodo `Sprite2D` para volver al espacio de trabajo de script.
+
+![click-script](img/signals_16_click_script.webp)
+
+Necesitamos realizar dos operaciones para conectar los nodos mediante código:
+
+1. Obtener una referencia a **Timer** desde `Sprite2D`.
+2. Llamar al método `connect()` en la señal `timeout` de **Timer**.
+
+> **Nota:** Para conectarse a una señal mediante código, debe llamar al método `connect()` de la señal que desea escuchar. En este caso, queremos escuchar la señal `timeout` de **Timer**.
+
+Queremos conectar la señal cuando se crea una instancia de la escena, y podemos hacerlo utilizando la función incorporada `Node._ready()`, que el motor llama automáticamente cuando se crea una instancia completa de un nodo.
+
+Para obtener una referencia a un nodo relativo al actual, utilizamos el método `Node.get_node()`. Podemos almacenar la referencia en una variable.
+
+```
+func _ready():
+	var timer = get_node("Timer")
+```
+
+La función `get_node()` observa los hijos del **Sprite2D** y obtiene los nodos por su nombre. Por ejemplo, si renombraste el nodo Timer a **BlinkingTimer** en el editor, tendrías que cambiar la llamada a `get_node("BlinkingTimer")`.
+
+Ahora podemos conectar el Timer al **Sprite2D** en la función `_ready()`:
+
+```
+func _ready():
+	var timer = get_node("Timer")
+	timer.timeout.connect(_on_timer_timeout)
+```
+
+La línea se lee así: conectamos la señal `timeout` del Timer al nodo al que está conectado el script (en este caso: Sprite2D). Cuando el Timer emite `timeout`, queremos llamar a la función `_on_timer_timeout()`, que necesitamos definir. Agreguémosla al final de nuestro script y usémosla para alternar la visibilidad de nuestro sprite.
+
+> **Nota:** Por convención, nombramos estos métodos de devolución de llamada (callbacks) en GDScript como `_on_node_name_signal_name`. Aquí y para GDScript, será `_on_timer_timeout`.
+
+```
+func _on_timer_timeout():
+	visible = not visible
+```
+
+La propiedad `visible` es un valor booleano que controla la visibilidad de nuestro nodo. La línea `visible = not visible` alterna el valor. Si `visible` es `true`, se convierte en `false` y viceversa.
+
+Si ejecuta la escena `Node2D` ahora, verá que el sprite parpadea, en intervalos de un segundo.
+
+#### Señales personalizadas
+
+> **Nota:** Esta sección es una referencia sobre cómo definir y usar sus propias señales, y no se basa en el proyecto creado en lecciones anteriores.
+
+Puede definir _señales personalizadas_ (custom signals) en un script. Digamos, por ejemplo, que desea mostrar una pantalla de fin de juego cuando la salud del jugador llegue a cero. Para ello, puede definir una señal denominada `died` o `health_depleted` cuando su salud llegue a `0`:
+
+```
+extends Node2D
+
+signal health_depleted
+
+var health = 10
+```
+
+> **Nota:** Como las señales representan eventos que acaban de ocurrir, generalmente usamos en sus nombres un verbo de acción en tiempo pasado.
+
+Sus _señales personalizadas_ funcionan de la misma manera que las integradas: aparecen en la pestaña **Nodo** y puede conectarse a ellas como cualquier otra:
+
+![click-script](img/signals_17_custom_signal.webp)
+
+Para emitir una señal en sus scripts, llame a `emit()` en la señal.
+
+```
+func take_damage(amount):
+	health -= amount
+	if health <= 0:
+		health_depleted.emit()
+```
+
+> **Nota:** Una señal puede declarar opcionalmente uno o más argumentos. Especifique los nombres de los argumentos entre paréntesis:
+
+```
+extends Node2D
+
+signal health_changed(old_value, new_value)
+
+var health = 10
+```
+
+> **Nota:** Los argumentos de la señal aparecen en el panel de nodos del editor, y Godot puede usarlos para generar funciones de devolución de llamada (callbacks) para usted. Sin embargo, aún puede emitir cualquier cantidad de argumentos cuando emite señales. Por lo tanto, depende de usted emitir los valores correctos.
+
+Para emitir valores junto con la señal, agréguelos como argumentos adicionales a la función `emit()`:
+
+```
+func take_damage(amount):
+	var old_health = health
+	health -= amount
+	health_changed.emit(old_health, health)
+```
+
+#### Resumen
+
+En Godot cualquier nodo emite señales cuando algo específico le sucede, por ejemplo: presionar un botón. Otros nodos pueden conectarse a señales individuales y reaccionar a eventos seleccionados.
+
+Las señales tienen muchos usos. Con ellas, puede reaccionar a un nodo que ingresa o sale del mundo del juego, a una colisión, a un personaje que ingresa o sale de un área, a un elemento de la interfaz que cambia de tamaño y mucho más.
+
+Por ejemplo, un **Area2D** que representa una moneda emite una señal `body_entered` cada vez que el cuerpo físico del jugador ingresa en su forma de colisión, lo que le permite saber cuándo el jugador lo recogió.
+
+En el siguiente capítulo, [Tu primer juego 2D](#tu-primer-juego-2d), crearás un juego 2D completo y pondrás en práctica todo lo que aprendiste hasta ahora.
 
 ## Capítulo 3. Tu primer juego 2D
 
-## Tu primer juego en 3D
+---
+
+Seguir en: https://docs.godotengine.org/en/stable/getting_started/first_2d_game/index.html
+
+## Capítulo 4. Tu primer juego 3D
 
 #### El `Project Manager`
 
