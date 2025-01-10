@@ -1811,6 +1811,264 @@ Deberías poder mover a _Player_, ver cómo aparecen los _mobs_ y ver cómo desa
 Cuando estés seguro de que todo funciona, elimina la llamada a `new_game()` de `_ready()` y reemplázala con `pass`.
 
 ¿Qué le falta a nuestro juego? Un poco de _interfaz de usuario_. En la próxima lección, agregaremos una _pantalla de título_ y mostraremos el _puntaje del jugador_.
+
+### Pantalla de visualización frontal (HUD, heads-up display)
+
+La última pieza que necesita nuestro juego es una _interfaz de usuario (IU)_ para mostrar elementos como la puntuación, un mensaje de "game over" y un botón de reinicio.
+
+Cree una nueva escena, haga clic en el botón **Other Node** y agregue un nodo **CanvasLayer** llamado `HUD`. "HUD" significa "pantalla de visualización frontal", una pantalla informativa que aparece como una superposición sobre la vista del juego.
+
+El nodo **CanvasLayer** nos permite dibujar nuestros elementos de IU en una capa sobre el resto del juego, de modo que la información que muestra no esté cubierta por ningún elemento del juego, como el jugador o los monstruos.
+
+El HUD debe mostrar la siguiente información:
+
+- _Puntuación_, modificada por `ScoreTimer`.
+- Un _mensaje_, como "Game Over" o "Get Ready!"
+- Un _botón_ "Start" para comenzar el juego.
+
+El nodo básico para los elementos de IU es **Control**. Para crear nuestra IU, usaremos dos tipos de nodos de _Control_: **Label** y **Button**.
+
+Crea los siguientes nodos hijo de `HUD`:
+
+- **Label** denominada `ScoreLabel`.
+- **Label** denominada `Message`.
+- **Button** denominado `StartButton`.
+- **Timer** denominado `MessageTimer`.
+
+Haz clic en **ScoreLabel** y escribe el número `0` en el campo `Text` del **Inspector**. La fuente predeterminada para los nodos **Control** es pequeña y no se escala bien. Hay un archivo de fuente incluido en los recursos del juego llamado `Xolonium-Regular.ttf`. Para usar esta fuente, haz lo siguiente:
+
+En `ScoreLabel > Control > Theme Overrides > Fonts`, elige **Load** y selecciona el archivo `Xolonium-Regular.ttf`.
+
+![custom-font-load-font](img/custom_font_load_font.webp)
+
+El tamaño de fuente sigue siendo demasiado pequeño, auméntalo a `64` en `ScoreLabel > Control > Theme Overrides > Font Sizes`. Una vez que hayas hecho esto con **ScoreLabel**, repite los cambios para los nodos **Message** y **StartButton**.
+
+![custom-font-size](img/custom_font_size.webp)
+
+> **Nota:** 
+>
+> **Anclajes:** los nodos `Control` tienen una posición y un tamaño, pero también tienen anclajes. Los anclajes definen el origen, el punto de referencia para los bordes del nodo.
+
+Organice los nodos como se muestra a continuación:
+
+#### ScoreLabel
+
+1. Agrega a **Label > Text** el valor `0`.
+2. Establece en **Label > Horizontal Alignment** y **Label > Vertical Alignment** el valor `Center`.
+3. Elige en **Control > Layout > Anchors Preset** el valor `Center Top`.
+
+![ui-anchor](img/ui_anchor.webp)
+
+Puede arrastrar los nodos para colocarlos manualmente o, para una colocación más precisa, utilice **Anchor Presets**.
+
+#### Message
+
+1. Agrega a **Label > Text** el valor `Dodge the creeps!`.
+2. Establece en **Label > Horizontal Alignment** y **Label > Vertical Alignment** el valor `Center`.
+3. Establece **Label > Autowrap Mode** en `Word`; de lo contrario, la etiqueta permanecerá en una línea.
+4. En **Control > Layout > Transform > Size > X**, establece `480` para utilizar todo el ancho de la pantalla.
+5. Elige en **Control > Layout > Anchors Preset** el valor `Center`.
+
+#### StartButton
+
+1. Agrega a **Label > Text** el valor `Start`.
+2. En **Control > Layout > Transform > Size > X**, establece `200` y **Control > Layout > Transform > Size > X**, establece `100`  para agregar un poco más de relleno entre el borde y el texto.
+3. Elige en **Control > Layout > Anchors Preset** el valor `Center Bottom`.
+4. En **Control > Layout > Transform > Size > Position Y**, establece `580`.
+
+En `MessageTimer`, configure **Timer > Wait Time** en `2` y configure la propiedad **Timer > One Shot** en "On".
+
+Ahora agregue este script al nodo `HUD`:
+
+```
+extends CanvasLayer
+
+# Notifica al nodo `Main` que se presionó el botón
+signal start_game
+```
+
+Ahora queremos mostrar un mensaje temporalmente, como `Get Ready`, por lo que agregamos el siguiente código:
+
+```
+func show_message(text):
+	$Message.text = text
+	$Message.show()
+	$MessageTimer.start()
+```
+
+También necesitamos procesar lo que sucede cuando el jugador pierde. El código a continuación mostrará `Game Over` durante 2 segundos, luego volverá a la pantalla de título y, después de una breve pausa, mostrará el botón **Start**.
+
+```
+func show_game_over():
+	show_message("Game Over")
+	# Espere hasta que MessageTimer haya contado regresivamente.
+	await $MessageTimer.timeout
+
+	$Message.text = "Dodge the Creeps!"
+	$Message.show()
+	# Crea un temporizador de un solo uso y espera a que termine.
+	await get_tree().create_timer(1.0).timeout
+	$StartButton.show()
+```
+
+Esta función se llama cuando el jugador pierde. Mostrará `Game Over` durante 2 segundos, luego volverá a la pantalla de título y, después de una breve pausa, mostrará el botón `Start`.
+
+> **Nota:** Cuando necesitas hacer una pausa por un breve tiempo, una alternativa al uso de un nodo **Timer** es usar la función `create_timer()` de **SceneTree**. Esto puede ser muy útil para agregar demoras como en el código anterior, donde queremos esperar un tiempo antes de mostrar el botón **Start**.
+
+Agregue el código a continuación al nodo `HUD` para actualizar la puntuación:
+
+```
+func update_score(score):
+	$ScoreLabel.text = str(score)
+```
+
+Conecte la señal `pressed()` de **StartButton** y la señal `timeout()` de **MessageTimer** al nodo `HUD` y agregue el siguiente código a las nuevas funciones:
+
+```
+func _on_start_button_pressed():
+	$StartButton.hide()
+	start_game.emit()
+
+func _on_message_timer_timeout():
+	$Message.hide()
+```
+
+#### Conectar el HUD al nodo principal
+
+Ahora que hemos terminado de crear la escena `HUD`, vuelve al nodo `Main`. Crea una instancia de la escena del `HUD` en el nodo `Main` como lo hiciste con la escena `Player`. El árbol de la escena debería verse así, así que asegúrate de no olvidarte de nada:
+
+![completed-main-scene](img/completed_main_scene.webp)
+
+Ahora necesitamos conectar la funcionalidad de `HUD` a nuestro script `Main`. Esto requiere algunas adiciones a la escena `Main`:
+
+Selecciona la escena hija `Hud` de `Main` y elige en la pestaña **Node** del Inspector, conecta la señal `start_game` de **HUD** a la función `new_game()` del nodo `Main` haciendo clic en el botón **Pick a method** en la ventana **Connect a Signal** y seleccionando el método `new_game()` o escribe `new_game` debajo de **Receiver Method** en la ventana. Verifica que el ícono de conexión verde ahora aparezca junto a `func new_game()` en el script.
+
+En `new_game()`, actualiza la visualización de la puntuación y muestra el mensaje `Get Ready`:
+
+```
+$HUD.update_score(score)
+$HUD.show_message("Get Ready")
+```
+
+En `game_over()`, debemos llamar a la función `HUD` correspondiente:
+
+```
+$HUD.show_game_over()
+```
+
+Por último, agrega esto a `_on_score_timer_timeout()` para mantener la visualización sincronizada con el cambio de puntuación:
+
+```
+$HUD.update_score(score)
+```
+
+> **Advertencia:**
+>
+> Recuerda eliminar la llamada a `new_game()` de `_ready()` si aún no lo has hecho, de lo contrario, tu juego comenzará automáticamente.
+
+¡Ahora estás listo para jugar! Haz clic en el botón **Play the Project**.
+
+#### Eliminación de los creeps antiguos
+
+Si juegas hasta **Game Over** y luego comienzas un nuevo juego de inmediato, los creeps del juego anterior pueden seguir en la pantalla. Sería mejor si todos desaparecieran al comienzo de un nuevo juego. Solo necesitamos una forma de decirle a todos los _mobs_ que se retiren. Podemos hacerlo con la funcionalidad **group**.
+
+En la escena `Mob`, selecciona el nodo raíz y haz clic en la pestaña **Nodo** junto al **Inspector** (el mismo lugar donde se encuentran las señales del nodo). Junto a **Señales**, haz clic en **Groups** para abrir la descripción general del grupo y en el botón `+` para abrir el cuadro de diálogo **Create New Group**.
+
+![group-tab](img/group_tab.webp)
+
+Nombra el grupo `mobs` y haz clic en **Ok** para agregar un nuevo grupo de escena.
+
+![add-group-dialog](img/add_group_dialog.webp)
+
+Ahora todos los _mobs_ estarán en el grupo `mobs`.
+
+![scene-group-mobs](img/scene_group_mobs.webp)
+
+Podemos agregar la siguiente línea a la función `new_game()` en `Main`:
+
+```
+get_tree().call_group("mobs", "queue_free")
+```
+
+La función `call_group()` llama a la función nombrada en cada nodo de un grupo; en este caso, le estamos indicando a cada _mob_ que se elimine a sí mismo.
+
+El juego está prácticamente terminado en este punto. En la próxima y última parte, lo perfeccionaremos un poco agregando un fondo, música en bucle y algunos atajos de teclado.
+
+### Terminando
+
+Ya hemos completado todas las funciones de nuestro juego. A continuación, se muestran algunos pasos restantes para agregar un poco más de "jugo" para mejorar la experiencia de juego.
+
+No dudes en ampliar la jugabilidad con tus propias ideas.
+
+#### Fondo
+
+El fondo gris predeterminado no es muy atractivo, así que cambiemos su color. Una forma de hacerlo es usar un nodo `ColorRect`. Hazlo el primer nodo debajo de `Main` para que se dibuje detrás de los otros nodos. `ColorRect` solo tiene una propiedad: Color. Elige un color que te guste (por ejemplo: `#556b2f`) y selecciona **Control > Layout > Anchors Preset:** `Full Rect` ya sea en la barra de herramientas en la parte superior de la ventana gráfica o en el inspector para que cubra toda la pantalla.
+
+También puedes agregar una imagen de fondo, si tienes una, usando un nodo `TextureRect` en su lugar.
+
+#### Efectos de sonido
+
+El sonido y la música pueden ser la forma más efectiva de agregar atractivo a la experiencia de juego. En la carpeta `art` de tu juego, tienes dos archivos de sonido: `House In a Forest Loop.ogg` para la música de fondo y `gameover.wav` para cuando el jugador pierde.
+
+Agrega dos nodos `AudioStreamPlayer` como hijos de `Main`. Nombra uno de ellos `Music` y el otro `DeathSound`. En cada uno, haz clic en la propiedad `Stream`, selecciona **Load** y elige el archivo de audio correspondiente.
+
+Todo el audio se importa automáticamente con la propiedad `Loop` deshabilitada. Si quieres que la música se reproduzca sin interrupciones, haz clic en la _flecha abajo_ del archivo cargado en **AudioStreamPlayer > Stream**, selecciona `Make Unique`, y luego haz clic en el archivo cargado en **AudioStreamPlayer > Stream** y marca la tilde en la casilla `Loop > On`:
+
+![unique-resource-music](img/unique_resource_music.webp)
+
+Para reproducir la música, agrega `$Music.play()` en la función **new_game()** y `$Music.stop()` en la función **game_over()**.
+
+Finalmente, agrega `$DeathSound.play()` en la función **game_over()**.
+
+```
+func game_over():
+	...
+	$Music.stop()
+	$DeathSound.play()
+
+func new_game():
+	...
+	$Music.play()
+```
+
+#### Atajo de teclado
+
+Dado que el juego se juega con controles de teclado, sería conveniente si también pudiéramos iniciar el juego presionando una tecla del teclado. Podemos hacer esto con la propiedad `Shortcut` del nodo **Button**.
+
+En una lección anterior, creamos cuatro acciones de entrada para mover el personaje. Crearemos una acción de entrada similar para asignarla al botón de inicio.
+
+Seleccione **Project" > "Project Settings** y luego haga clic en la pestaña **Input Map**. De la misma manera que creó las acciones de entrada de movimiento, cree una nueva acción de entrada llamada `start_game` y agregue una asignación de teclas para la tecla `Enter`.
+
+![input-mapping-start_game](img/input-mapping-start_game.webp)
+
+Ahora sería un buen momento para agregar compatibilidad con el controlador si tiene uno disponible. Conecte o empareje su controlador y luego, debajo de cada acción de entrada para la que desea agregar compatibilidad con el controlador, haga clic en el botón `+` y presione el botón, el pad direccional o la dirección del joystick correspondiente que desea asignar a la acción de entrada respectiva.
+
+En la escena `HUD`, seleccione **StartButton** y busque su propiedad **StartButton > BaseButton > Shortcut** en el **Inspector**. Cree un nuevo _recurso_ **Shortcut** haciendo clic dentro del cuadro y seleccionando `New Shortcut`, luego haga clic en el reciente creado `[rayo] Shortcut` y abra la matriz **Events** y agréguele un nuevo elemento de matriz haciendo clic en `Array[InputEvent] (size 0)` y luego clic en botón `+ Add Element` .
+
+![start-button-shortcut](img/start_button_shortcut.webp)
+
+Cree una nueva **InputEventAction** haciendo clic en la caja `<empty>` y seleccionar `New InputEventAction`. Luego clic en la caja recientemente creada `InputEventAction` y en el área de texto **Action** escriba `start_game` luego del signo `&`.
+
+![start-button-shortcut2](img/start_button_shortcut2.webp)
+
+Ahora, cuando aparezca el botón `Start`, puede hacer clic en él o presionar Enter para iniciar el juego.
+
+Y con eso, completó su primer juego 2D en Godot.
+
+![dodge-preview](img/dodge_preview.webp)
+
+Haz creado un personaje controlado por el jugador, enemigos que aparecen aleatoriamente en el tablero de juego, un contador de puntuación, implementado una finalización de juego terminado y un volver a empezar, una interfaz de usuario, sonidos y más. ¡Felicitaciones!
+
+Aún queda mucho por aprender, pero puedes tomarte un momento para apreciar lo que lograste.
+
+Y cuando estés listo, puedes pasar a **Tu primer juego en 3D** para aprender a crear un juego en 3D completo desde cero, en Godot.
+
+#### Compartir el juego terminado con otros
+
+Si quieres que la gente pruebe tu juego sin tener que instalar Godot, tendrás que exportar el proyecto para cada sistema operativo en el que quieras que se pueda jugar el juego. Consulta [Exportar proyectos](https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html#doc-exporting-projects) para obtener instrucciones.
+
+Después de exportar el proyecto, comprime el _archivo ejecutable_ y _PCK_ exportados (no los archivos del proyecto sin procesar) en un archivo **ZIP**, luego carga este archivo ZIP en un sitio web para compartir archivos.
+
 ---
 
 Seguir en: https://docs.godotengine.org/en/stable/getting_started/first_2d_game/index.html
