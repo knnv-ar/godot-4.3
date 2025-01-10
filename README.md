@@ -2002,7 +2002,7 @@ No dudes en ampliar la jugabilidad con tus propias ideas.
 
 #### Fondo
 
-El fondo gris predeterminado no es muy atractivo, así que cambiemos su color. Una forma de hacerlo es usar un nodo `ColorRect`. Hazlo el primer nodo debajo de `Main` para que se dibuje detrás de los otros nodos. `ColorRect` solo tiene una propiedad: Color. Elige un color que te guste (por ejemplo: `#556b2f`) y selecciona **Control > Layout > Anchors Preset:** `Full Rect` ya sea en la barra de herramientas en la parte superior de la ventana gráfica o en el inspector para que cubra toda la pantalla.
+El fondo gris predeterminado no es muy atractivo, así que cambiemos su color. Una forma de hacerlo es usar un nodo `ColorRect`. Hazlo el primer nodo debajo de `Main` para que se dibuje detrás de los otros nodos. `ColorRect` solo tiene una propiedad: Color. Elige un color que te guste (por ejemplo: `#416c6d`) y selecciona **Control > Layout > Anchors Preset:** `Full Rect` ya sea en la barra de herramientas en la parte superior de la ventana gráfica o en el inspector para que cubra toda la pantalla.
 
 También puedes agregar una imagen de fondo, si tienes una, usando un nodo `TextureRect` en su lugar.
 
@@ -2069,15 +2069,85 @@ Si quieres que la gente pruebe tu juego sin tener que instalar Godot, tendrás q
 
 Después de exportar el proyecto, comprime el _archivo ejecutable_ y _PCK_ exportados (no los archivos del proyecto sin procesar) en un archivo **ZIP**, luego carga este archivo ZIP en un sitio web para compartir archivos.
 
----
 
-Seguir en: https://docs.godotengine.org/en/stable/getting_started/first_2d_game/index.html
+
 
 ## Capítulo 4. Tu primer juego 3D
 
-#### El `Project Manager`
+En esta serie de tutoriales paso a paso, crearás tu primer juego 3D completo con Godot. Al final de la serie, tendrás un proyecto propio simple pero terminado como el gif animado que aparece a continuación:
+
+![squash-the-creeps-final](img/squash-the-creeps-final.webp)
+
+El juego que codificaremos aquí es similar a [Tu primer juego 2D](capitulo-3-tu-primer-juego-2d), con un giro: ahora puedes saltar y tu objetivo es aplastar a los bichos. De esta manera, reconocerás los patrones que aprendiste en el tutorial anterior y los desarrollarás con nuevo código y características.
+
+Aprenderás a:
+
+- Trabajar con _coordenadas 3D_ con una _mecánica de salto_.
+- Usar _cuerpos cinemáticos_ para mover personajes 3D y detectar _cuándo y cómo chocan_.
+- Usar _capas físicas_ y un _grupo_ para detectar interacciones con entidades específicas.
+- Codificar un _juego procedimental_ básico creando instancias de monstruos en intervalos de tiempo regulares.
+- Diseñar una animación de movimiento y cambiar su velocidad en tiempo de ejecución.
+- Dibujar una _interfaz de usuario en un juego 3D_.
+
+Y más.
+
+Este tutorial es para principiantes que siguieron la serie completa de introducción. Comenzaremos lentamente con instrucciones detalladas y las acortaremos a medida que sigamos pasos similares. Si eres un programador experimentado, puedes buscar el código fuente de la demostración completa aquí: [Código fuente de Squash the Creep](https://github.com/godotengine/godot-3d-dodge-the-creeps).
+
+> **Nota:** Puedes seguir esta serie sin haber hecho la de 2D. Sin embargo, si eres nuevo en el desarrollo de juegos, te recomendamos que comiences con 2D. El código de juego 3D siempre es más complejo y la serie 2D te dará las bases para seguir con más comodidad.
+
+Preparamos algunos recursos del juego para que podamos pasar directamente al código. Puedes descargarlos aquí: [Recursos de Squash the Creeps](./assets/3d/squash_the_creeps_start_1.1.0.zip).
+
+Primero trabajaremos en un _prototipo básico para el movimiento del jugador_. Luego _agregaremos los monstruos_ que generaremos aleatoriamente alrededor de la pantalla. Después de eso, _implementaremos la mecánica de salto y aplastamiento_ antes de refinar el juego con una buena animación. Terminaremos con la _puntuación_ y la _pantalla de reinicio_.
+
+### Contenido
+
+- [Configuración del área de juego](#configuración-del-área-de-juego)
+- Escena del jugador y acciones de entrada
+- Movimiento del jugador con código
+- Diseño de la escena de la multitud
+- Generación de monstruos
+- Saltar y aplastar monstruos
+- Matar al jugador
+- Puntuación y repetición
+- Animación de personajes
+- Más allá
+
+### Configuración del área de juego
+
+En esta primera parte, vamos a configurar el área de juego. Empecemos importando los recursos de inicio y configurando la escena del juego.
+
+Hemos preparado un proyecto Godot con los modelos 3D y los sonidos que usaremos para este tutorial, cuyo enlace se encuentra en el Índice. Si aún no lo has hecho, puedes descargar el archivo aquí: [Recursos de Squash the Creeps](./assets/3d/squash_the_creeps_start_1.1.0.zip).
+
+Una vez que lo hayas descargado, extrae el archivo `.zip` en tu computadora. Abre el **Project Manager** de Godot y haz clic en el botón **Import**.
+
+![01.import_button](./img/01.import_button.webp)
+
+En la ventana emergente de importación, ingresa la ruta completa al directorio recién creado al descomprimir el archivo **.zip**: `squash_the_creeps_start/`. Puedes hacer clic en el botón **Browse** a la derecha para abrir un explorador de archivos y navegar hasta el archivo `project.godot` que contiene la carpeta.
+
+![02.browse_to_project_folder](./img/02.browse_to_project_folder.webp)
+
+Haz clic en **Import & Edit** para abrir el proyecto en el editor.
+
+![03.import_and_edit](./img/03.import_and_edit.webp)
+
+Puede aparecer una ventana que te notifique que el proyecto fue generado por una versión anterior de Godot. Haz clic en **Convert Full Project** para convertir el proyecto a tu versión actual de Godot.
+
+![import_project_to_4.x_prompt](./img/import_project_to_4.x_prompt.webp)
+
+El proyecto de inicio contiene un **ícono** y dos carpetas: `art/` y `fonts/`. Allí, encontrarás los recursos artísticos y la música que usaremos en el juego.
+
+![04.assets](./img/04.assets.webp)
+
+Hay dos modelos 3D, `player.glb` y `mob.glb`, algunos materiales que pertenecen a estos modelos y una pista de música.
+
 
 ---
+
+# SEGUIR EN: https://docs.godotengine.org/en/stable/getting_started/first_2d_game/index.html
+
+---
+
+## Enlaces
 
 [Harvard CS50’s Introduction to Computer Science](https://cs50.harvard.edu/x/2024/)
 
@@ -2093,6 +2163,10 @@ https://gamedesignskills.com/game-design/video-game-mechanics/
 
 https://www.juegostudio.com/blog/the-ultimate-beginners-guide-to-game-mechanics
 
+https://github.com/godotengine/godot-demo-projects/
+
+https://github.com/godotengine/godot-demo-projects/releases
+
 ## Atajos de teclado (Shortcuts)
 
 Project > Quit to Project List (`Ctrl + Shift + Q`)
@@ -2102,6 +2176,11 @@ Project > Quit to Project List (`Ctrl + Shift + Q`)
 
 Los nombre de escenas se escriben con la primera letra en mayusculas y el resto en minusculas. Por ejemplo: `Player`
 
+## Glosario
+PCK: resource packs (PCK) files, with extension `.pck`
+
+
+---
 
 # Guía Profesional: Diferencias entre Area2D, StaticBody2D, CharacterBody2D y RigidBody2D en Godot Engine 4
 
