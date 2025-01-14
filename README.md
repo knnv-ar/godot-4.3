@@ -2140,10 +2140,100 @@ El proyecto de inicio contiene un **ícono** y dos carpetas: `art/` y `fonts/`. 
 
 Hay dos modelos 3D, `player.glb` y `mob.glb`, algunos materiales que pertenecen a estos modelos y una pista de música.
 
+#### Configuración del área jugable
+
+Vamos a crear nuestra escena principal con un nodo simple (`Node`) como raíz. En el dock `Scene`, haz clic en el botón **Add Child Node** representado por un ícono `+` en la parte superior izquierda y haz doble clic en `Node`. ​​Nombra el nodo `Main`. Un método alternativo para cambiar el nombre del nodo es hacer clic derecho en nodo y elegir `Rename` (o `F2`). Alternativamente, para agregar un nodo a la escena, puedes presionar `Ctrl + A` (`Cmd + A` en macOS).
+
+![04.assets](./img/05.webp)
+
+Guarda la escena como `main.tscn` presionando `Ctrl + S` (`Cmd + S` en macOS).
+
+Comenzaremos agregando un piso que evitará que los personajes se caigan. Para crear colisionadores estáticos como el piso, las paredes o los techos, puedes usar nodos `StaticBody3D`. Requieren nodos hijos `CollisionShape3D` para definir el área de colisión. Con el nodo principal seleccionado, agregue un nodo **StaticBody3D** y luego un nodo **CollisionShape3D**. Cambie el nombre de **StaticBody3D** a `Ground`.
+
+![adding_static_body3D](./img/adding_static_body3D.webp)
+
+Su árbol de escena debería verse así:
+
+![06.staticbody_node](./img/06.webp)
+
+Aparece un _signo de advertencia_ junto a **CollisionShape3D** porque no hemos definido su **forma**. Si hace clic en el _ícono_, aparece una ventana emergente para brindarle más información.
+
+![07.collision_shape_warning](./img/07.webp)
+
+Para crear una **forma**, seleccione el nodo **CollisionShape3D**, diríjase al **Inspector** y haga clic en el campo `<empty>` junto a la propiedad **Shape**. Cree un `New BoxShape3D`.
+
+![08.create_box_shape3D](./img/08.create_box_shape3D.jpg)
+
+La forma de caja es perfecta para paredes y suelos planos. Su grosor la hace fiable para bloquear incluso objetos que se mueven rápidamente.
+
+El modelo de alambre de una caja aparece en la ventana gráfica con tres puntos naranjas. Puede hacer clic y arrastrarlos para editar las extensiones de la forma de forma interactiva. También podemos establecer con precisión el tamaño en el inspector. Haga clic en BoxShape3D para expandir el recurso. Establezca su tamaño en 60 en el eje X, 2 para el eje Y y 60 para el eje Z.
+
+../../_images/09.box_size.webp
+
+Las formas de colisión son invisibles. Necesitamos agregar un piso visual que vaya con él. Seleccione el nodo Ground y agregue un MeshInstance3D como su elemento secundario.
+
+../../_images/10.mesh_instance3d.png
+
+En el Inspector, haz clic en el campo junto a Malla y crea un recurso BoxMesh para crear un cuadro visible.
+
+../../_images/11.box_mesh.webp
+
+Una vez más, es demasiado pequeño de forma predeterminada. Haz clic en el icono del cuadro para expandir el recurso y establecer su Tamaño en 60, 2 y 60.
+
+../../_images/12.cube_resized.png
+
+Deberías ver una losa gris ancha que cubre la cuadrícula y los ejes azul y rojo en la ventana gráfica.
+
+Vamos a mover el suelo hacia abajo para que podamos ver la cuadrícula del piso. Para ello, se puede utilizar la función de ajuste a la cuadrícula. El ajuste a la cuadrícula se puede activar de dos formas en el editor 3D. La primera es presionando el botón Usar ajuste (o presionando la tecla Y). El segundo es seleccionar un nodo, arrastrar un controlador en el gizmo y luego mantener presionada la tecla Ctrl mientras se hace clic para habilitar el ajuste mientras se mantiene presionada la tecla Ctrl.
+
+../../_images/use_snap.webp
+
+Comience por configurar el ajuste con su método preferido. Luego mueva el nodo Ground usando el eje Y (la flecha verde en el gizmo).
+
+../../_images/move_gizmo_y_axis.webp
+
+Nota
+
+Si no puede ver el manipulador de objetos 3D como en la imagen anterior, asegúrese de que el modo Seleccionar esté activo en la barra de herramientas sobre la vista.
+
+../../_images/14.select_mode_icon.png
+
+Mueva el suelo hacia abajo 1 metro para tener una cuadrícula de editor visible. Una etiqueta en la esquina inferior izquierda de la ventana gráfica le indica cuánto está trasladando el nodo.
+
+../../_images/15.translation_amount.png
+
+Nota
+
+Al mover el nodo Ground hacia abajo, se mueven los dos elementos secundarios junto con él. Asegúrate de mover el nodo Ground, no MeshInstance3D o CollisionShape3D.
+
+En última instancia, transform.position.y de Ground debe ser -1
+
+../../_images/ground_down1meter.webp
+
+Agreguemos una luz direccional para que nuestra escena no sea toda gris. Selecciona el nodo principal y agrega un nodo secundario DirectionalLight3D.
+
+../../_images/create_directional_light3d.webp
+
+Necesitamos mover y rotar el nodo DirectionalLight3D. Muévelo hacia arriba haciendo clic y arrastrando la flecha verde del manipulador y haz clic y arrastra en el arco rojo para rotarlo alrededor del eje X, hasta que el suelo esté iluminado.
+
+En el Inspector, activa Shadow -> Enabled haciendo clic en la casilla de verificación.
+
+../../_images/16.turn_on_shadows.webp
+
+En este punto, tu proyecto debería verse así.
+
+../../_images/17.project_with_light.webp
+
+Ese es nuestro punto de partida. En la siguiente parte, trabajaremos en la escena del jugador y el movimiento de la base.
+
+
+
+
+
 
 ---
 
-# SEGUIR EN: https://docs.godotengine.org/en/stable/getting_started/first_2d_game/index.html
+# SEGUIR EN: https://docs.godotengine.org/en/stable/getting_started/first_3d_game/02.player_input.html
 
 ---
 
