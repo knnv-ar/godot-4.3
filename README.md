@@ -2222,7 +2222,63 @@ En este punto, tu proyecto debería verse así:
 
 Ese es nuestro punto de partida. En la siguiente parte, trabajaremos en la escena del jugador y el movimiento de la base.
 
+### Escena del jugador y acciones de entrada
 
+En las próximas dos lecciones, diseñaremos la escena del jugador, registraremos input actions (acciones de entrada) personalizadas y codificaremos el movimiento del jugador. Al final, tendrás un personaje jugable que se mueve en ocho direcciones.
+
+Crea una nueva escena yendo al menú **Scene** en la parte superior izquierda y haciendo clic en **New Scene**.
+
+![01.new_scene](./img/01.new_scene.png)
+
+Crea un **CharacterBody3D** como nodo raíz:
+
+![add_character_body3D](./img/add_character_body3D.webp)
+
+Nombra el **CharacterBody3D** como `Player`. Los **CharacterBody** son complementarios a los **RigidBody2D** y **Area2D** utilizados en el tutorial del juego 2D. Al igual que los _rigid bodies (cuerpos rígidos)_, pueden moverse y colisionar con el entorno, pero en lugar de ser controlados por el motor de física, **tú** dictas su movimiento. Verás cómo usamos las características únicas del nodo cuando codificamos la mecánica de salto y aplastamiento.
+
+> **Consulte:**
+>
+> Para obtener más información sobre los diferentes tipos de nodos de física, consulta la [Introducción a la física](https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html#doc-physics-introduction).
+
+Por ahora, vamos a crear una _configuración básica_ para el modelo 3D de nuestro personaje. Esto nos permitirá rotar el modelo más tarde a través del código mientras reproduce una animación.
+
+Agrega un nodo `Node3D` como hijo de **Player** y nómbralo `Pivot`
+
+![adding_node3D](./img/adding_node3D.webp)
+
+Luego, en el dock **FileSystem**, expande la carpeta `art/` haciendo doble clic en ella y arrastra y suelta `player.glb` en **Pivot**.
+
+![02.instantiating_the_model](./img/02.instantiating_the_model.webp)
+
+Esto debería _instanciar_ el modelo como hijo de `Pivot`. Puedes cambiarle el nombre a `Character`.
+
+![02.instantiating_the_model](./img/02.instantiating_the_model.webp)
+
+> **Nota:**
+>
+> Los archivos `.glb` contienen datos de escenas 3D basados ​​en la especificación de código abierto **glTF 2.0**. Es una alternativa moderna y poderosa a un formato propietario como _FBX_, que Godot también admite. Para producir estos archivos, diseñamos el modelo en **Blender 3D** y lo exportamos a **glTF**.
+
+Al igual que con todos los tipos de nodos de física, necesitamos un **collision shape** para que nuestro personaje colisione con el entorno. Seleccione el nodo `Player` nuevamente y agregue un nodo hijo **CollisionShape3D**. En el **Inspector**, en la propiedad **Shape**, agregue un `New SphereShape3D`.
+
+![add_capsuleshape3d](./img/add_capsuleshape3d.webp)
+
+El _estructura de alambre_ de la esfera aparece debajo del personaje.
+
+![04.sphere_shape](./img/04.sphere_shape.png)
+
+Será la _forma_ que el motor de física use para colisionar con el entorno, por lo que queremos que se ajuste mejor al modelo 3D. Hazla un poco más grande arrastrando el _punto naranja_ en el viewport. Mi esfera tiene un radio de aproximadamente `0.8` metros.
+
+Luego, mueva la _forma de colisión_ hacia arriba para que su parte inferior se alinee aproximadamente con el plano de la cuadrícula.
+
+![05_3D](./img/05_3D.webp)
+
+Para que sea más fácil mover la _forma_, puede alternar la visibilidad del modelo haciendo clic en el _ícono del ojo_ junto a los nodos `Character` o `Pivot`.
+
+![06.toggling_visibility](./img/06.toggling_visibility.webp)
+
+Guarda la escena como `player.tscn`.
+
+Con los nodos listos, casi podemos comenzar a codificar. Pero primero, debemos definir algunas _input actions (acciones de entrada)_.
 
 
 
