@@ -4,7 +4,7 @@
 - [Capítulo 1. Introducción](#capítulo-1-introducción)
 - [Capítulo 2. Primeros pasos](#capítulo-2-primeros-pasos)
 - [Capítulo 3. Tu primer juego 2D](#capítulo-3-tu-primer-juego-2d)
-
+- [Capítulo 4. Tu primer juego 3D](#capítulo-4-tu-primer-juego-3s)
 ---
 
 ```
@@ -2164,65 +2164,61 @@ Para crear una **forma**, seleccione el nodo **CollisionShape3D**, diríjase al 
 
 ![08.create_box_shape3D](./img/08.create_box_shape3D.jpg)
 
-La forma de caja es perfecta para paredes y suelos planos. Su grosor la hace fiable para bloquear incluso objetos que se mueven rápidamente.
+La `BoxShape3D` es perfecta para paredes y suelos planos. Su grosor la hace fiable para bloquear incluso objetos que se mueven rápidamente.
 
-El modelo de alambre de una caja aparece en la ventana gráfica con tres puntos naranjas. Puede hacer clic y arrastrarlos para editar las extensiones de la forma de forma interactiva. También podemos establecer con precisión el tamaño en el inspector. Haga clic en BoxShape3D para expandir el recurso. Establezca su tamaño en 60 en el eje X, 2 para el eje Y y 60 para el eje Z.
+Un _cubo con estrutura de alambre_ aparece en la ventana gráfica con **tres puntos naranjas**. Puede hacer clic y arrastrarlos para editar las extensiones de la forma de manera interactiva. También podemos establecer con precisión el tamaño en el inspector. Haga clic en `BoxShape3D` para expandir el recurso. Establezca **Size** en `x: 60`, `y: 2` y `z: 60`.
 
-../../_images/09.box_size.webp
+![08.box-size](./img/09.box_size.webp)
 
-Las formas de colisión son invisibles. Necesitamos agregar un piso visual que vaya con él. Seleccione el nodo Ground y agregue un MeshInstance3D como su elemento secundario.
+Las `CollisionShape` son invisibles. Necesitamos agregar un piso visual que vaya con él. Seleccione el nodo `Ground` y agregue un **MeshInstance3D** como su hijo.
 
-../../_images/10.mesh_instance3d.png
+![10](./img/10.webp)
 
-En el Inspector, haz clic en el campo junto a Malla y crea un recurso BoxMesh para crear un cuadro visible.
+En `Inspector`, haz clic en el campo junto a **Mesh** y crea un recurso `New BoxMesh` para crear un cubo visible.
 
-../../_images/11.box_mesh.webp
+![11.box_mesh](./img/11.box_mesh.webp)
 
-Una vez más, es demasiado pequeño de forma predeterminada. Haz clic en el icono del cuadro para expandir el recurso y establecer su Tamaño en 60, 2 y 60.
+Una vez más, es demasiado pequeño de forma predeterminada. Haz clic en el icono del cubo para expandir el recurso y establecer `Size` en `x: 60`, `y: 2` y `z: 60`.
 
-../../_images/12.cube_resized.png
+![12.cube_resized](./img/12.webp)
 
-Deberías ver una losa gris ancha que cubre la cuadrícula y los ejes azul y rojo en la ventana gráfica.
+Deberías ver una _losa ancha gris clara _ que cubre la cuadrícula y el _gizmo_ con los ejes azul, verde y rojo en el viewport.
 
-Vamos a mover el suelo hacia abajo para que podamos ver la cuadrícula del piso. Para ello, se puede utilizar la función de ajuste a la cuadrícula. El ajuste a la cuadrícula se puede activar de dos formas en el editor 3D. La primera es presionando el botón Usar ajuste (o presionando la tecla Y). El segundo es seleccionar un nodo, arrastrar un controlador en el gizmo y luego mantener presionada la tecla Ctrl mientras se hace clic para habilitar el ajuste mientras se mantiene presionada la tecla Ctrl.
+Vamos a mover `Ground` hacia abajo para que podamos ver la cuadrícula del piso. Para ello, se puede utilizar la función  _ajuste a cuadrícula_ (grid snapping). El ajuste a cuadrícula se puede activar de dos formas en el editor 3D. La primera es presionando el botón **Use Snap** (o presionando la tecla `Y`). El segundo es seleccionar un nodo, arrastrar un controlador en el _gizmo_ y **luego** mantener presionada la tecla `Ctrl` mientras se hace clic para habilitar el ajuste mientras se mantiene presionada la tecla `Ctrl`.
 
-../../_images/use_snap.webp
+![use_snap](./img/use_snap.webp)
 
-Comience por configurar el ajuste con su método preferido. Luego mueva el nodo Ground usando el eje Y (la flecha verde en el gizmo).
+Comience por configurar el ajuste con su método preferido. Luego mueva el nodo `Ground` usando el **eje Y** (la flecha verde en el gizmo).
 
-../../_images/move_gizmo_y_axis.webp
+![move_gizmo_y_axis](./img/move_gizmo_y_axis.webp)
 
-Nota
+> **Nota:** Si no puede ver el manipulador de objetos 3D como en la imagen anterior, asegúrese de que el modo **Select** esté activo en la barra de herramientas sobre la vista.
 
-Si no puede ver el manipulador de objetos 3D como en la imagen anterior, asegúrese de que el modo Seleccionar esté activo en la barra de herramientas sobre la vista.
+![move_gizmo_y_axis](./img/14.webp)
 
-../../_images/14.select_mode_icon.png
+Mueva el suelo hacia abajo `1` metro para tener una cuadrícula de editor visible. Una etiqueta en la esquina inferior izquierda de la ventana gráfica le indica cuánto está trasladando el nodo.
 
-Mueva el suelo hacia abajo 1 metro para tener una cuadrícula de editor visible. Una etiqueta en la esquina inferior izquierda de la ventana gráfica le indica cuánto está trasladando el nodo.
+![translation_amount](./img/15.webp)
 
-../../_images/15.translation_amount.png
+> **Nota:** Al mover el nodo `Ground` hacia abajo, se mueven los dos elementos secundarios junto con él. Asegúrate de mover el nodo `Ground`, **no** _MeshInstance3D_ o _CollisionShape3D_.
 
-Nota
+En última instancia, **transform.position.y** de `Ground` debe ser `-1`.
 
-Al mover el nodo Ground hacia abajo, se mueven los dos elementos secundarios junto con él. Asegúrate de mover el nodo Ground, no MeshInstance3D o CollisionShape3D.
+![ground_down1meter](./img/ground_down1meter.webp)
 
-En última instancia, transform.position.y de Ground debe ser -1
+Agreguemos una luz direccional para que nuestra escena no sea toda gris. Selecciona el nodo `Main` y agrega un nodo hijo **DirectionalLight3D**.
 
-../../_images/ground_down1meter.webp
+![create_directional_light3d](./img/create_directional_light3d.webp)
 
-Agreguemos una luz direccional para que nuestra escena no sea toda gris. Selecciona el nodo principal y agrega un nodo secundario DirectionalLight3D.
+Necesitamos mover y rotar el nodo `DirectionalLight3D`. Muévelo hacia arriba haciendo clic y arrastrando la flecha verde del _gizmo_ y haz clic y arrastra en el arco rojo para rotarlo alrededor del eje X, hasta que el suelo esté iluminado.
 
-../../_images/create_directional_light3d.webp
+En **Inspector**, activa **Shadow > Enabled** haciendo clic en la casilla de verificación.
 
-Necesitamos mover y rotar el nodo DirectionalLight3D. Muévelo hacia arriba haciendo clic y arrastrando la flecha verde del manipulador y haz clic y arrastra en el arco rojo para rotarlo alrededor del eje X, hasta que el suelo esté iluminado.
+![16.turn_on_shadows](./img/16.turn_on_shadows.webp)
 
-En el Inspector, activa Shadow -> Enabled haciendo clic en la casilla de verificación.
+En este punto, tu proyecto debería verse así:
 
-../../_images/16.turn_on_shadows.webp
-
-En este punto, tu proyecto debería verse así.
-
-../../_images/17.project_with_light.webp
+![17.project_with_light](./img/17.project_with_light.webp)
 
 Ese es nuestro punto de partida. En la siguiente parte, trabajaremos en la escena del jugador y el movimiento de la base.
 
