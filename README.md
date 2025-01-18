@@ -2280,12 +2280,452 @@ Guarda la escena como `player.tscn`.
 
 Con los nodos listos, casi podemos comenzar a codificar. Pero primero, debemos definir algunas _input actions (acciones de entrada)_.
 
+#### Creación de acciones de entrada
+
+Para mover el personaje, escucharemos la entrada del jugador, como presionar las teclas de flecha. En Godot, si bien podríamos escribir todas las combinaciones de teclas en código, existe un sistema poderoso que te permite asignar una etiqueta a un conjunto de teclas y botones. Esto simplifica nuestros scripts y los hace más legibles.
+
+Este sistema es el **Input Map**. Para acceder a su editor, dirígete al menú _Project_ y selecciona _Project Settings_.
+
+![07.project_settings](./img/07.project_settings.png)
+
+En la parte superior, hay varias pestañas. Haz clic en _Input Map_. Esta ventana te permite agregar nuevas _acciones_ en la parte superior; son tus _etiquetas_. En la parte inferior, puedes vincular teclas a estas acciones.
+
+![07-3D](./img/07-3D.webp)
+
+Los proyectos de Godot vienen con algunas acciones predefinidas diseñadas para el diseño de la interfaz de usuario (ver la captura de pantalla anterior). Estas se volverán visibles si habilitas la casilla _Show Built-in Actions_. Podríamos usarlas aquí, pero en su lugar estamos definiendo las nuestras para que sean compatibles con los gamepads. Deja la casilla _Show Built-in Actions_ deshabilitada.
+
+Vamos a nombrar nuestras acciones `move_left`, `move_right`, `move_forward`, `move_back` y `jump`.
+
+Para agregar una acción, escribe su nombre en la barra de la parte superior y presiona **Enter**.
+
+![07.adding_action](./img/07.adding_action.webp)
+
+Crea las siguientes cinco acciones:
+
+![08.actions_list_empty](./img/08.actions_list_empty.png)
+
+Para vincular una tecla o botón a una _acción_, haz clic en el botón `+` a su derecha. Haz lo mismo con `move_left`. Presiona la tecla de **flecha izquierda** y haz clic en **OK**.
+
+![left_inputmap](./img/left_inputmap.webp)
+
+Vincula también la tecla **A** a la acción `move_left`.
+
+![09](./img/09.webp)
+
+Ahora agreguemos compatibilidad con el joystick izquierdo de un gamepad. Haz clic en el botón `+` nuevamente, pero esta vez, selecciona `Manual Selection > Joypad Axes`.
+
+![joystick_axis_input](./img/joystick_axis_input.webp)
+
+Selecciona el _eje X negativo_ en el joystick izquierdo.
+
+![left_joystick_select](./img/left_joystick_select.webp)
+
+Deja los demás valores como predeterminados y pulsa **OK**.
+
+> **Nota:**
+>
+> Si quieres que los controladores tengan diferentes acciones de entrada, debes utilizar la opción _Devices_ en _Additional Options_. El _Device 0_ corresponde al primer gamepad conectado, el _Device 1_ corresponde al segundo mando conectado, y así sucesivamente.
+
+Haz lo mismo con las demás acciones de entrada. Por ejemplo, vincula la **flecha derecha**, **D**, y el **eje positivo del joystick izquierdo** a `move_right`. Después de vincular todas las teclas, tu interfaz debería verse así:
+
+![12.move_inputs_mapped](./img/12.move_inputs_mapped.webp)
+
+La última acción que debes configurar es la acción `jump`. Vincula la tecla **Space** y el botón **A** del gamepad.
+
+![13.joy_button_option](./img/13.joy_button_option.webp)
+
+Tu acción de entrada de salto debería verse así:
+
+![14.jump_input_action](./img/14.jump_input_action.webp)
+
+Esas son todas las acciones que necesitamos para este juego. Puedes utilizar este menú para etiquetar cualquier grupo de teclas y botones en tus proyectos.
+
+En la siguiente parte, codificaremos y probaremos el movimiento del jugador.
+
+### Movemos al jugador con código
+
+¡Es hora de codear! Vamos a usar las _input actions_ que creamos en la última parte para mover al personaje.
+
+> **Nota:**
+>
+>Para este proyecto, seguiremos las convenciones de nombres de Godot.
+>
+>**GDScript:** las clases (nodos) usan `PascalCase`, las variables y funciones usan `snake_case` y las constantes usan `ALL_CAPS` (Ver [guía de estilo de GDScript](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html#doc-gdscript-styleguide)).
+
+Haga clic derecho en el nodo `Player` y seleccione **Attach Script** para agregarle un nuevo script. En la ventana emergente, configure _Template_ en `Empty` antes de presionar el botón **Create**. La configuramos en _empty_ porque queremos escribir nuestro propio código para el movimiento del jugador.
+
+![01.attach_script_to_player](./img/01.attach_script_to_player.webp)
+
+Comencemos con las _propiedades_ de la clase. Vamos a definir una _velocidad de movimiento_ (`speed`), una aceleración de caída que representa la _gravedad_ (`fall_acceleration`) y una _velocidad_ que usaremos para mover al personaje (`target_velocity`).
+
+```
+extends CharacterBody3D
+
+# Qué tan rápido se mueve el jugador en metros por segundo.
+@export var speed = 14
+
+# La aceleración hacia abajo cuando está en el aire, en metros por segundo al cuadrado.
+@export var fall_acceleration = 75
+
+var target_velocity = Vector3.ZERO
+
+```
+Estas son propiedades comunes para un cuerpo en movimiento. El `target_velocity` es un _vector 3D_ que combina una velocidad con una dirección. Aquí, lo definimos como una propiedad porque queremos actualizar y reutilizar su valor en todos los fotogramas.
+
+> **Nota:**
+>
+>Los valores son bastante diferentes del código 2D porque las distancias están expresadas en _metros_. Mientras que en 2D, mil unidades (píxeles) pueden corresponder solo a la mitad del ancho de la pantalla, en 3D, es un kilómetro.
+
+Vamos a codificar el movimiento. Comenzamos calculando el vector de dirección de entrada utilizando el objeto global `Input`, en `_physics_process()`.
+
+```
+func _physics_process(delta):
+	# Creamos una variable local para almacenar la dirección del input.
+	var direction = Vector3.ZERO
+
+	# Comprobamos cada entrada de movimiento y consecuentemente actualizamos la dirección.
+	if Input.is_action_pressed("move_right"):
+		direction.x += 1
+	if Input.is_action_pressed("move_left"):
+		direction.x -= 1
+	if Input.is_action_pressed("move_back"):
+		# Observa cómo trabajamos con los ejes x y z del vector.
+		# En 3D, el plano XZ es el plano del suelo.
+		direction.z += 1
+	if Input.is_action_pressed("move_forward"):
+		direction.z -= 1
+```
+
+Aquí, vamos a realizar todos los cálculos utilizando la función virtual `_physics_process()`. Al igual que `_process()`, permite actualizar el nodo en cada fotograma, pero está diseñado específicamente para código relacionado con la física, como mover un cuerpo cinemático o rígido.
+
+> **Ver también:**
+>
+>Para obtener más información sobre la diferencia entre `_process()` y `_physics_process()`, consulte [Idle and Physics Processing](https://docs.godotengine.org/en/stable/tutorials/scripting/idle_and_physics_processing.html#doc-idle-and-physics-processing).
+
+Comenzamos inicializando una variable `direction` en `Vector3.ZERO`. Luego, verificamos si el jugador está presionando una o más de las entradas `move_*` y actualizamos de forma consecuente los componentes `x` y `z` del vector. Estos corresponden a los ejes del plano del suelo.
+
+Estas cuatro condiciones nos dan _ocho posibilidades_ y, por lo tanto, _ocho direcciones posibles_.
+
+En caso de que el jugador presione, digamos, tanto `W` como `D` simultáneamente, el vector tendrá una longitud de aproximadamente `1.4`. Pero si presiona una sola tecla, tendrá una longitud de `1`. Queremos que la longitud del vector sea constante y que no se mueva más rápido en diagonal. Para hacerlo, podemos llamar a su método `normalized()`.
+
+```
+#func _physics_process(delta):
+	#...
+
+	if direction != Vector3.ZERO:
+		direction = direction.normalized()
+		# Establecer la propiedad basis afectará la rotación del nodo.
+		$Pivot.basis = Basis.looking_at(direction)
+```
+
+Aquí, solo normalizamos el vector si la dirección tiene una longitud mayor que cero, lo que significa que el jugador está presionando una tecla de dirección.
+
+Calculamos la dirección hacia la que mira `$Pivot` creando una [**Basis**](https://docs.godotengine.org/en/stable/classes/class_basis.html#class-basis) que mira en la dirección `direction`.
+
+Luego, actualizamos la velocidad. Tenemos que calcular la _velocidad del suelo_ y la _velocidad de caída_ por separado. Asegúrate de retroceder una pestaña para que las líneas estén dentro de la función `_physics_process()` pero fuera de la condición que acabamos de escribir anteriormente.
+
+```
+func _physics_process(delta):
+	#...
+	if direction != Vector3.ZERO:
+		#...
+
+	# Velocidad en el suelo
+	target_velocity.x = direction.x * speed
+	target_velocity.z = direction.z * speed
+
+	# Velocidad vertical
+	if not is_on_floor(): #  Si está en el aire, cae hacia el suelo. Literalmente, gravedad.
+		target_velocity.y = target_velocity.y - (fall_acceleration * delta)
+
+	# Movimiento del personaje
+	velocity = target_velocity
+	move_and_slide()
+```
+
+La función `CharacterBody3D.is_on_floor()` devuelve `true` si el cuerpo chocó contra el suelo en este fotograma. Por eso aplicamos gravedad al jugador **solo** mientras está en el aire.
+
+Para la velocidad vertical, restamos la _aceleración de caída_ multiplicada por el _tiempo delta_ en cada fotograma. Esta línea de código hará que nuestro personaje caiga en cada cuadro, siempre que no esté sobre el suelo o colisione con él.
+
+El motor de física solo puede detectar interacciones con paredes, el suelo u otros cuerpos durante un cuadro determinado si se producen movimientos y colisiones. Usaremos esta propiedad más adelante para codificar el salto.
+
+En la última línea, llamamos a `CharacterBody3D.move_and_slide()`, que es un método poderoso de la clase `CharacterBody3D` que te permite mover un personaje suavemente. Si choca contra una pared a mitad de un movimiento, el motor intentará suavizarlo por ti. Utiliza el _velocity_ nativo de **CharacterBody3D**.
+
+Y ese es todo el código que necesitas para mover al personaje en el suelo.
+
+A continuación se incluye el código completo de `player.gd` como referencia:
+
+```
+extends CharacterBody3D
+
+# Qué tan rápido se mueve el jugador en metros por segundo.
+@export var speed = 14
+# La aceleración hacia abajo cuando está en el aire, en metros por segundo al cuadrado.
+@export var fall_acceleration = 75
+
+var target_velocity = Vector3.ZERO
+
+
+func _physics_process(delta):
+	var direction = Vector3.ZERO
+
+	if Input.is_action_pressed("move_right"):
+		direction.x += 1
+	if Input.is_action_pressed("move_left"):
+		direction.x -= 1
+	if Input.is_action_pressed("move_back"):
+		direction.z += 1
+	if Input.is_action_pressed("move_forward"):
+		direction.z -= 1
+
+	if direction != Vector3.ZERO:
+		direction = direction.normalized()
+		$Pivot.basis = Basis.looking_at(direction)
+
+	# Velocidad en el suelo
+	target_velocity.x = direction.x * speed
+	target_velocity.z = direction.z * speed
+
+	# Velocidad vertical
+	if not is_on_floor(): # Si está en el aire, cae hacia el suelo. Literalmente, gravedad
+		target_velocity.y = target_velocity.y - (fall_acceleration * delta)
+
+	# Mover al personaje
+	velocity = target_velocity
+	move_and_slide()
+```
+
+#### Probando el movimiento de nuestro jugador
+
+Vamos a colocar a nuestro jugador en la escena `Main` para probarlo. Para ello, necesitamos crear una instancia del jugador y luego agregar una **cámara**. A diferencia de lo que ocurre en 2D, en 3D no verás nada si tu _viewport_ no tiene una **cámara** apuntando a algo.
+
+Guarda tu escena `Player` y abre la escena `Main`. Puedes hacer clic en la pestaña `Main` en la parte superior del editor para hacerlo.
+
+![02](./img/02.webp)
+
+Si antes cerraste la escena, dirígete al dock **FileSystem** y haz doble clic en `main.tscn` para volver a abrirlo.
+
+Para crear una instancia de `Player`, haz clic derecho en el nodo `Main` y selecciona _Instantiate Child Scene_.
+
+![03.instance_child_scene](./img/03.instance_child_scene.webp)
+
+En la ventana emergente, haz doble clic en `player.tscn`. El personaje debería aparecer en el centro de la ventana gráfica.
+
+##### Agregar una cámara
+
+A continuación agregaremos la **cámara**. Al igual que hicimos con el _pivote de nuestro jugador_, vamos a crear una estructura básica. Haz clic derecho en el nodo `Main` nuevamente y selecciona _Add Child Node_. Crea un nuevo **Marker3D** y nómbralo `CameraPivot`. Selecciona `CameraPivot` y agrégale un nodo hijo `Camera3D`. Tu árbol de escena debería verse similar a esto:
+
+![04.scene_tree_with_camera](./img/04.scene_tree_with_camera.webp)
+
+Observa la casilla de verificación _Preview_ que aparece en la parte superior izquierda de la vista 3D cuando tienes la cámara seleccionada. Puedes hacer clic en ella para obtener una vista previa de la proyección de la cámara en el juego.
+
+![05-moving-player-code](./img/05-moving-player-code.webp)
+
+Vamos a usar el _Pivot_ para rotar la cámara como si estuviera en una grúa. Primero, dividiremos la vista 3D para poder navegar libremente por la escena y ver lo que ve la cámara.
+
+En la barra de herramientas justo encima del viewport, haz clic en _View_ y luego en _2 Viewports_. También puedes presionar `Ctrl + 2` (`Cmd + 2` en macOS).
+
+![12.viewport_change](./img/12.viewport_change.webp)
+
+![06-viewport](./img/06-viewport.webp)
+
+En la vista inferior, selecciona tu `Camera3D` y activa _Preview_ de la cámara haciendo clic en la casilla de verificación correspondiente:
+
+![07-perspective](./img/07-perspective.webp)
+
+En la vista superior, asegúrate de que tu `Camera3D` esté seleccionada y mueve la cámara unas `19` unidades en el eje Z (arrastra la flecha azul).
+
+![08-perspective-preview](./img/08-perspective-preview.webp)
+
+Aquí es donde ocurre la magia. Selecciona _CameraPivot_ y gíralo `-45` grados alrededor del eje X (usando el círculo rojo). Verás que la cámara se mueve como si estuviera unida a una grúa.
+
+![09-perspective-preview-b](./img/09-perspective-preview-b.webp)
+
+Puedes ejecutar la escena presionando `F6` y las teclas flecha para mover el personaje.
+
+![10-perspective-preview-c](./img/10-perspective-preview-c.webp)
+
+Podemos ver un espacio vacío alrededor del personaje debido a la proyección en perspectiva. En este juego, vamos a usar una proyección ortográfica en su lugar para encuadrar mejor el área de juego y facilitarle al jugador la lectura de distancias.
+
+Vuelve a seleccionar `Camera` y en `Inspector`, establece _Projection to Orthogonal_ y _Size_ en `19`. El personaje ahora debería verse más plano y el suelo debería llenar el fondo.
+
+> **Nota:**
+>
+> Al usar una cámara ortogonal en Godot 4, la calidad de la sombra direccional depende del valor _Far value_ de la cámara. Cuanto mayor sea el valor _Far_, más lejos podrá ver la cámara. Sin embargo, valores más altos de _Far_ también reducen la calidad de las sombras, ya que la representación de las sombras debe cubrir una distancia mayor.
+>
+> Si las sombras direccionales se ven demasiado borrosas después de cambiar a una cámara ortogonal, reduzca la propiedad _Far_ de la cámara a un valor menor, como por ejemplo `100`. No reduzca demasiado esta propiedad _Far_, o los objetos en la distancia comenzarán a desaparecer.
+
+![13.camera3d_values](./img/13.camera3d_values.webp)
+
+Pruebe su escena y debería poder moverse en las ocho direcciones y no atravesar el piso.
+
+Finalmente ya tenemos el movimiento del jugador y la vista en su lugar. A continuación, trabajaremos en los _mobs_.
+
+### Diseño de la escena de los mobs
+
+En esta parte, vas a codear los monstruos, a los que llamaremos _mobs_. En la siguiente lección los generaremos aleatoriamente alrededor del área jugable.
+
+Diseñemos los _mobs_ en una nueva escena. La estructura de nodos será similar a la escena `player.tscn`.
+
+Crea una escena con, una vez más, un nodo **CharacterBody3D** como raíz. Llámalo `Mob`. Agrega un nodo hijo **Node3D**, llámalo `Pivot`. Arrastra y suelta el archivo `mob.glb` desde el dock **FileSystem** hasta el `Pivot` para agregar el modelo 3D del monstruo a la escena.
+
+![drag_drop_mob](./img/drag_drop_mob.webp)
+
+Puedes cambiar el nombre del nodo **mob** recién arrastrado a `Character`.
+
+![01-mobs](./img/01-mobs.webp)
+
+Necesitamos una _forma de colisión_ para que nuestro cuerpo funcione. Haz clic derecho en el nodo `Mob`, la raíz de la escena, y haz clic en **Add Child Node**.
+
+![02-mobs](./img/02-mobs.webp)
+
+Agrega un **CollisionShape3D**.
+
+![03-mobs](./img/03-mobs.webp)
+
+En **Inspector**, asigna un _New BoxShape3D_ a la propiedad _Shape_.
+
+![08.create_box_shape3D](./img/08.create_box_shape3D.jpg)
+
+Deberíamos cambiar su tamaño para que se ajuste mejor al modelo 3D. Puedes hacerlo de forma interactiva haciendo clic y arrastrando los puntos naranjas.
+
+El **BoxShape3D** debe tocar el suelo y ser un poco más delgado que el modelo. Los motores de física funcionan de tal manera que si la **SphereShape3D** del jugador llegara a tocar la esquina del **BoxShape3D**, se producirá una colisión. Si el **BoxShape3D** fuera un poco más grande en comparación con el modelo 3D, podrías morir a cierta distancia del monstruo y el juego parecerá injusto para los jugadores.
+
+![05-mobs](./img/05-mobs.webp)
+
+Observa que mi **BoxShape3D** es más alto que el monstruo. Esto está bien en este juego porque estamos mirando la escena desde arriba y usando una perspectiva fija. Las _formas de colisión_ no tienen que coincidir exactamente con el modelo. Cuando pruebas el juego es la _forma en que se siente_ lo que debería determinar su forma y tamaño.
+
+#### Eliminar mobs de la pantalla
+
+Vamos a generar _mobs_ a intervalos regulares de tiempo en el nivel del juego. Si no tenemos cuidado, su número podría aumentar hasta el infinito, y no queremos que eso suceda. Cada instancia de _mobs_ tiene un costo de memoria y de procesamiento, y no queremos pagar por ello cuando el _mob_ está fuera de la pantalla.
+
+Una vez que un _mob_ sale de la pantalla, ya no lo necesitamos, por lo que deberíamos eliminarlo. Godot tiene un nodo que detecta cuando los objetos salen de la pantalla, **VisibleOnScreenNotifier3D**, y lo vamos a usar para destruir a nuestros _mobs_.
+
+> **Nota:**
+>
+> Cuando sigues creando instancias de un objeto, hay una técnica que puedes usar para evitar el costo de crear y destruir instancias todo el tiempo llamada _pooling (agrupación)_. Consiste en crear previamente una matriz de objetos y reutilizarlos una y otra vez.
+>
+> Cuando trabajas con GDScript, no necesitas preocuparte por esto. La razón principal para usar _pools_ es evitar congelamientos con lenguajes de _recolección de basura_ como C# o Lua. GDScript usa una técnica diferente para administrar la memoria, _reference counting (conteo de referencias)_, la cual no contempla esa amenaza. Puedes aprender más sobre eso aquí: [Administración de memoria](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html#doc-gdscript-basics-memory-management).
+
+Selecciona el nodo `Mob` y agrega un nodo hijo `VisibleOnScreenNotifier3D`. Aparece otro cubo, rosa esta vez. Cuando este cubo salga completamente de la pantalla, el nodo emitirá una señal.
+
+![06-mobs](./img/06-mobs.webp)
+
+Ajusta el tamaño del cubo usando los _puntos naranjas_ hasta que cubra todo el modelo 3D.
+
+![07-mobs](./img/07-mobs.webp)
+
+##### Codificación del movimiento deL mob
+
+Implementemos el movimiento del _mob_. Lo haremos en dos pasos. Primero, escribiremos un script en `Mob` que defina una función para inicializar el _mob_. Luego, codificaremos el mecanismo de generación aleatorio en la escena `main.tscn` y llamaremos a la función desde allí.
+
+Adjuntaremos un script a `Mob` con **Attach Script**.
+
+![08-mobs](./img/08-mobs.webp)
+
+A continuación, se muestra el código de movimiento con el que comenzaremos. Definimos dos propiedades, `min_speed` y `max_speed`, para definir un rango de velocidad aleatorio, que luego usaremos para definir `CharacterBody3D.velocity`.
+
+```
+extends CharacterBody3D
+
+# Velocidad mínima de la criatura en metros por segundo.
+@export var min_speed = 10
+# Velocidad máxima de la criatura en metros por segundo.
+@export var max_speed = 18
+
+
+func _physics_process(_delta):
+	move_and_slide()
+```
+
+De manera similar al jugador, movemos el _mob_ en cada cuadro llamando a la función `CharacterBody3D.move_and_slide()`. Esta vez, no actualizamos `velocity` en cada fotograma; queremos que el _mob_ se mueva a una velocidad constante y abandone la pantalla, incluso si chocara contra un obstáculo.
+
+Necesitamos definir otra función para calcular `CharacterBody3D.velocity`. Esta función girará al _mob_ hacia el jugador y aleatorizará tanto su ángulo de movimiento como su velocidad.
+
+La función tomará como argumentos a  `start_position`, la posición de aparición del _mob_, y a `player_position`, la posicion del jugador.
+
+Posicionamos al _mob_ en `start_position` y lo giramos hacia el jugador usando el método `look_at_from_position()`, y aleatorizamos el ángulo rotando una cantidad aleatoria alrededor del eje Y. A continuación, `randf_range()` genera un valor aleatorio entre `-PI / 4` radianes y `PI / 4` radianes.
+
+```
+# Esta función se llamará desde la escena principal.
+func initialize(start_position, player_position):
+	# Posicionamos al mob colocándolo en start_position
+	# y lo rotamos hacia player_position, de modo que mire al jugador.
+	look_at_from_position(start_position, player_position, Vector3.UP)
+	# Rotamos este monstruo aleatoriamente dentro del rango de -45 y +45 grados,
+	# para que no se mueva directamente hacia el jugador.
+	rotate_y(randf_range(-PI / 4, PI / 4))
+```
+
+Obtuvimos una posición aleatoria, ahora necesitamos una `random_speed`. `randi_range()` será útil ya que proporciona valores enteros aleatorios, y usaremos `min_speed` y `max_speed`. `random_speed` es solo un entero, y lo usamos para multiplicar nuestro `CharacterBody3D.velocity`. Después de aplicar `random_speed`, rotamos el Vector3 `CharacterBody3D.velocity`  hacia el jugador.
+
+##### Saliendo de la pantalla
+
+Aún tenemos que destruir a los _mobs_ cuando abandonan la pantalla. Para ello, conectaremos la señal `screen_exited` de nuestro nodo **VisibleOnScreenNotifier3D** a `Mob`.
+
+Regresa al viewpor 3D haciendo clic en la etiqueta _3D_ en la parte superior del editor. También puedes presionar `Ctrl + F2` (`Opt + 2` en macOS).
+
+![09-mobs](./img/09-mobs.webp)
+
+Selecciona el nodo **VisibleOnScreenNotifier3D** y, en el lado derecho de la interfaz, navega hasta el dock **Node**. Haz doble clic en la señal `screen_exited()`.
+
+![10.node_dock](./img/10.node_dock.webp)
+
+Conecta la señal a `Mob`
+
+![11.connect_signal](./img/11.connect_signal.webp)
+
+Esto agregará una nueva función en tu script de _mob_, `_on_visible_on_screen_notifier_3d_screen_exited()`. Desde allí, llama al método `queue_free()`. Esta función destruye la instancia en la que se llama.
+
+```
+func _on_visible_on_screen_notifier_3d_screen_exited():
+	queue_free()
+```
+
+¡Nuestro monstruo está listo para entrar al juego! En la siguiente parte, generarás _mobs_ en el nivel del juego.
+
+A continuación, se incluye el script `mob.gd` completo como referencia:
+
+```
+extends CharacterBody3D
+
+# Velocidad mínima del monstruo en metros por segundo.
+@export var min_speed = 10
+# Velocidad máxima del monstruo en metros por segundo.
+@export var max_speed = 18
+
+func _physics_process(_delta):
+	move_and_slide()
+
+# Esta función será llamada desde la escena Main.
+func initialize(start_position, player_position):
+	# Posicionamos al monstruo colocándolo en start_position
+	# y lo rotamos hacia player_position, de modo que mire al jugador.
+	look_at_from_position(start_position, player_position, Vector3.UP)
+	# Rotamos este monstruo aleatoriamente dentro de un rango de -45 y +45 grados,
+	# para que no se mueva directamente hacia el jugador.
+	rotate_y(randf_range(-PI / 4, PI / 4))
+
+	# Calculamos una velocidad aleatoria (entero)
+	var random_speed = randi_range(min_speed, max_speed)
+	# Calculamos una velocidad hacia adelante (forward velocity) que representa la velocidad.
+	velocity = Vector3.FORWARD * random_speed
+	# We then rotate the velocity vector based on the mob's Y rotation
+	# in order to move in the direction the mob is looking.
+	# Luego rotamos el vector de velocidad en función de la rotación del eje Y del mob
+	# para moverlo en la dirección en la que mira.
+	velocity = velocity.rotated(Vector3.UP, rotation.y)
+
+func _on_visible_on_screen_notifier_3d_screen_exited():
+	queue_free()
+```
+
 
 
 
 ---
 
-# SEGUIR EN: https://docs.godotengine.org/en/stable/getting_started/first_3d_game/02.player_input.html
+# SEGUIR EN: https://docs.godotengine.org/en/stable/getting_started/first_3d_game/05.spawning_mobs.html
 
 ---
 
