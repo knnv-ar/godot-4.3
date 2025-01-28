@@ -27,18 +27,18 @@ Primero trabajaremos en un _prototipo básico para el movimiento del jugador_. L
 
 ### Contenido
 
-- [Configuración del área de juego](#configuración-del-área-de-juego)
-- Escena del jugador y acciones de entrada
-- Movimiento del jugador con código
-- Diseño de la escena de la multitud
-- Generación de monstruos
-- Saltar y aplastar monstruos
-- Matar al jugador
-- Puntuación y repetición
-- Animación de personajes
-- Más allá
+1. [Configuración del área de juego](#1-configuración-del-área-de-juego)
+2. [Escena del jugador y acciones de entrada](#2-escena-del-jugador-y-acciones-de-entrada)
+3. [Movemos al jugador con código](#3-movemos-al-jugador-con-código)
+4. [Diseño de la escena de los mobs](#4-diseño-de-la-escena-de-los-mobs)
+5. [Generación de mobs](#5-generación-de-mobs)
+6. [Salto y aplastamiento de mobs](#6-salto-y-aplastamiento-de-mobs)
+7. [Muerte del jugador](#7-muerte-del-jugador)
+8. [Puntuación y repetición](#8-puntuación-y-repetición)
+9. [Animación de personajes](#9-animación-de-personajes)
+10. [Más allá](#10-más-allá)
 
-### Configuración del área de juego
+### 1. Configuración del área de juego
 
 En esta primera parte, vamos a configurar el área de juego. Empecemos importando los recursos de inicio y configurando la escena del juego.
 
@@ -148,9 +148,9 @@ En este punto, tu proyecto debería verse así:
 
 Ese es nuestro punto de partida. En la siguiente parte, trabajaremos en la escena del jugador y el movimiento de la base.
 
-### Escena del jugador y acciones de entrada
+### 2. Escena del jugador y acciones de entrada
 
-En las próximas dos lecciones, diseñaremos la escena del jugador, registraremos input actions (acciones de entrada) personalizadas y codificaremos el movimiento del jugador. Al final, tendrás un personaje jugable que se mueve en ocho direcciones.
+En las próximas dos lecciones, diseñaremos la escena del jugador, registraremos _input actions (acciones de entrada)_ personalizadas y codificaremos el movimiento del jugador. Al final, tendrás un personaje jugable que se mueve en ocho direcciones.
 
 Crea una nueva escena yendo al menú **Scene** en la parte superior izquierda y haciendo clic en **New Scene**.
 
@@ -178,7 +178,7 @@ Luego, en el dock **FileSystem**, expande la carpeta `art/` haciendo doble clic 
 
 Esto debería _instanciar_ el modelo como hijo de `Pivot`. Puedes cambiarle el nombre a `Character`.
 
-![02.instantiating_the_model](./img/02.instantiating_the_model.webp)
+![03.scene_structure](./img/03.scene_structure.png)
 
 > **Nota:**
 >
@@ -188,11 +188,11 @@ Al igual que con todos los tipos de nodos de física, necesitamos un **collision
 
 ![add_capsuleshape3d](./img/add_capsuleshape3d.webp)
 
-El _estructura de alambre_ de la esfera aparece debajo del personaje.
+La _estructura de alambre_ de la esfera aparece debajo del personaje.
 
 ![04.sphere_shape](./img/04.sphere_shape.png)
 
-Será la _forma_ que el motor de física use para colisionar con el entorno, por lo que queremos que se ajuste mejor al modelo 3D. Hazla un poco más grande arrastrando el _punto naranja_ en el viewport. Mi esfera tiene un radio de aproximadamente `0.8` metros.
+Será la _forma_ que el motor de física use para colisionar con el entorno, por lo que queremos que se ajuste mejor al modelo 3D. Hazla un poco más grande arrastrando el _punto naranja_ en el viewport. Mi esfera tiene un radio de aproximadamente `0.8` metros. Este valor también puede ser ingresado en **Inspector** en la propiedad **CollisionShape3D > Shape > SphereShape > Radius**.
 
 Luego, mueva la _forma de colisión_ hacia arriba para que su parte inferior se alinee aproximadamente con el plano de la cuadrícula.
 
@@ -208,7 +208,7 @@ Con los nodos listos, casi podemos comenzar a codificar. Pero primero, debemos d
 
 #### Creación de acciones de entrada
 
-Para mover el personaje, escucharemos la entrada del jugador, como presionar las teclas de flecha. En Godot, si bien podríamos escribir todas las combinaciones de teclas en código, existe un sistema poderoso que te permite asignar una etiqueta a un conjunto de teclas y botones. Esto simplifica nuestros scripts y los hace más legibles.
+Para mover el personaje, escucharemos el _input_ del jugador, como presionar las teclas de flecha. En Godot, si bien podríamos escribir todas las combinaciones de teclas en código, existe un sistema poderoso que te permite asignar una etiqueta a un conjunto de teclas y botones. Esto simplifica nuestros scripts y los hace más legibles.
 
 Este sistema es el **Input Map**. Para acceder a su editor, dirígete al menú _Project_ y selecciona _Project Settings_.
 
@@ -222,7 +222,7 @@ Los proyectos de Godot vienen con algunas acciones predefinidas diseñadas para 
 
 Vamos a nombrar nuestras acciones `move_left`, `move_right`, `move_forward`, `move_back` y `jump`.
 
-Para agregar una acción, escribe su nombre en la barra de la parte superior y presiona **Enter**.
+Para agregar una acción, escribe su nombre en la barra de la parte superior, cuyo placeholder dice "Add New Action", y presiona **Enter**.
 
 ![07.adding_action](./img/07.adding_action.webp)
 
@@ -268,7 +268,7 @@ Esas son todas las acciones que necesitamos para este juego. Puedes utilizar est
 
 En la siguiente parte, codificaremos y probaremos el movimiento del jugador.
 
-### Movemos al jugador con código
+### 3. Movemos al jugador con código
 
 ¡Es hora de codear! Vamos a usar las _input actions_ que creamos en la última parte para mover al personaje.
 
@@ -473,11 +473,11 @@ Puedes ejecutar la escena presionando `F6` y las teclas flecha para mover el per
 
 Podemos ver un espacio vacío alrededor del personaje debido a la proyección en perspectiva. En este juego, vamos a usar una proyección ortográfica en su lugar para encuadrar mejor el área de juego y facilitarle al jugador la lectura de distancias.
 
-Vuelve a seleccionar `Camera` y en `Inspector`, establece _Projection to Orthogonal_ y _Size_ en `19`. El personaje ahora debería verse más plano y el suelo debería llenar el fondo.
+Vuelve a seleccionar `Camera` y en `Inspector`, establece _Projection_ en `Orthogonal` y _Size_ en `19`. El personaje ahora debería verse más plano y el suelo debería llenar el fondo.
 
 > **Nota:**
 >
-> Al usar una cámara ortogonal en Godot 4, la calidad de la sombra direccional depende del valor _Far value_ de la cámara. Cuanto mayor sea el valor _Far_, más lejos podrá ver la cámara. Sin embargo, valores más altos de _Far_ también reducen la calidad de las sombras, ya que la representación de las sombras debe cubrir una distancia mayor.
+> Al usar una cámara ortogonal en Godot 4, la calidad de la sombra direccional depende del valor que tenga la propiedad _Far_ de la cámara. Cuanto mayor sea el valor de _Far_, más lejos podrá ver la cámara. Sin embargo, valores más altos de _Far_ también reducen la calidad de las sombras, ya que la representación de las sombras debe cubrir una distancia mayor.
 >
 > Si las sombras direccionales se ven demasiado borrosas después de cambiar a una cámara ortogonal, reduzca la propiedad _Far_ de la cámara a un valor menor, como por ejemplo `100`. No reduzca demasiado esta propiedad _Far_, o los objetos en la distancia comenzarán a desaparecer.
 
@@ -487,7 +487,7 @@ Pruebe su escena y debería poder moverse en las ocho direcciones y no atravesar
 
 Finalmente ya tenemos el movimiento del jugador y la vista en su lugar. A continuación, trabajaremos en los _mobs_.
 
-### Diseño de la escena de los mobs
+### 4. Diseño de la escena de los mobs
 
 En esta parte, vas a codear los monstruos, a los que llamaremos _mobs_. En la siguiente lección los generaremos aleatoriamente alrededor del área jugable.
 
@@ -645,23 +645,23 @@ func initialize(start_position, player_position):
 func _on_visible_on_screen_notifier_3d_screen_exited():
   queue_free()
 ```
-### Generación de mobs
+### 5. Generación de mobs
 
 En esta parte, vamos a generar mobs a lo largo de un camino de forma aleatoria. Al final, tendrás mobs deambulando por el tablero de juego.
 
 ![01-spawing-mobs](./img/01-spawing-mobs.webp)
 
-Haz doble clic en main.tscn en el dock del Sistema de archivos para abrir la escena principal.
+Haz doble clic en `main.tscn` en el dock del _FileSystem_ para abrir la escena `Main`.
 
-Antes de dibujar el camino, vamos a cambiar la resolución del juego. Nuestro juego tiene un tamaño de ventana predeterminado de 1152x648. Lo configuraremos en 720x540, un pequeño y bonito cuadro.
+Antes de dibujar el camino, vamos a cambiar la resolución del juego. Nuestro juego tiene un tamaño de ventana predeterminado de `1152x648`. Lo configuraremos en `720x540`.
 
-Ve a Proyecto -> Configuración del proyecto.
+Ve a _Project > Project Settings_.
 
 ![02-spawing-mobs](./img/02-spawing-mobs.webp)
 
-Si todavía tienes abierto el Mapa de entrada, cambia a la pestaña General.
+Si todavía tienes abierto _Input Map_, cambia a la pestaña _General_.
 
-En el menú de la izquierda, navega hacia abajo hasta Pantalla -> Ventana. A la derecha, establece el Ancho en 720 y la Altura en 540.
+En el menú de la izquierda, navega hacia abajo hasta _Display > Window_. A la derecha, establece _Viewport Width_ en `720` y _Viewport Height_ en `540`.
 
 ![03.window_settings](./img/03.window_settings.webp)
 
@@ -675,17 +675,17 @@ Para encontrar los límites de la vista, podemos usar algunas _mallas de sustitu
 
 ![04.camera_preview](./img/04.camera_preview.png)
 
-##### Agregado de cilindros de sustitución
+##### Agregado de mallas de sustitución
 
-Agreguemos las mallas de sustitución. Agregue un nuevo **Node3D** como hijo del nodo principal y nómbrelo `Cylinders`. Lo usaremos para agrupar los cilindros. Seleccione _Cylinders_ y agregue un nodo hijo **MeshInstance3D**.
+Agreguemos las mallas de sustitución. Agregue un nuevo **Node3D** como hijo del nodo `Main` y nómbrelo `Cylinders`. Lo usaremos para agrupar los cilindros. Seleccione _Cylinders_ y agregue un nodo hijo **MeshInstance3D**.
 
 ![05-spawning-mobs](./img/05-spawning-mobs.webp)
 
-En **Inspector**, asigne un `New CylinderMesh` a la propiedad _Mesh_.
+En **Inspector**, asigne a la propiedad _Mesh_ el valor `New CylinderMesh`.
 
 ![06-spawning-mobs](./img/06-spawning-mobs.webp)
 
-Establezca la ventana gráfica superior en la vista ortogonal superior utilizando el menú en la esquina superior izquierda de la ventana gráfica. Alternativamente, puede presionar la tecla `7` del teclado de números.
+Configure el _viewport superior_ en `Top View` (que una vez seleccionada aparecerá como _Top Orthogonal [auto]_) utilizando el menú en la esquina superior izquierda de la ventana gráfica. Alternativamente, puede presionar la tecla `7` del teclado de números.
 
 ![07-spawning-mobs](./img/07-spawning-mobs.webp)
 
@@ -693,7 +693,7 @@ La cuadrícula puede distraer. Puede alternarla yendo al menú _View_ en la barr
 
 ![08-spawning-mobs](./img/08-spawning-mobs.webp)
 
-Ahora desea mover el cilindro a lo largo del plano del suelo, mirando la vista previa de la cámara en la ventana gráfica inferior. Para hacerlo, recomiendo usar el ajuste de cuadrícula. Puedes alternarlo haciendo clic en el _ícono del imán_ en la barra de herramientas o presionando la tecla `Y`.
+Ahora desea mover el cilindro a lo largo del plano del suelo, mirando la vista previa de la cámara en el _viewport inferior_. Para hacerlo, recomiendo usar _Use Snap (ajuste de cuadrícula)_. Puedes alternarlo haciendo clic en el _ícono del imán_ en la barra de herramientas o presionando la tecla `Y`.
 
 ![09-spawning-mobs](./img/09-spawning-mobs.webp)
 
@@ -735,7 +735,7 @@ Establezca el color en algo que contraste con el fondo, como un naranja brillant
 
 ![15-spawning-mobs](./img/15-spawning-mobs.webp)
 
-Ahora podemos usar los cilindros como guías. Plégelos en el dock _Scene_ haciendo clic en la _flecha gris_ junto a ellos. En el futuro, también puede alternar su visibilidad haciendo clic en el icono del _ojo_ junto a `Cylinders`.
+Ahora podremos usar los cilindros como guías. Plégelos en el dock _Scene_ haciendo clic en la _flecha gris_ junto a ellos. En el futuro, también puede alternar su visibilidad haciendo clic en el icono del _ojo_ junto a `Cylinders`.
 
 ![16-spawning-mobs](./img/16-spawning-mobs.webp)
 
@@ -865,7 +865,7 @@ Puedes probar la escena presionando `F6`. Deberías ver que los mobs aparecen y 
 
 Por ahora, chocan y se deslizan entre sí cuando sus caminos se cruzan. Abordaremos esto mismo en la siguiente parte.
 
-### Salto y aplastamiento de mobs
+### 6. Salto y aplastamiento de mobs
 
 En esta parte, agregaremos la capacidad de saltar y aplastar a los mobs. En la próxima lección, haremos que el jugador muera cuando un monstruo lo golpee en el suelo.
 
@@ -900,7 +900,7 @@ Ahora, podemos asignarlas a nuestros nodos de física.
 
 ##### Asignación de layers y masks
 
-En la escena **Main**, seleccione el nodo `Ground`. En **Inspector**, expanda la sección _Collision_. Allí, puede ver las capas y máscaras del nodo como una cuadrícula de botones.
+En la escena **Main**, seleccione el nodo `Ground`. En **Inspector**, expanda la sección _CollisionObject3D > Collision_. Allí, puede ver las capas y máscaras del nodo como una cuadrícula de botones.
 
 ![04.default_physics_properties](./img/04.default_physics_properties.webp)
 
@@ -916,15 +916,31 @@ Ten en cuenta que puedes hacer clic en el botón `...` en el lado derecho de las
 
 A continuación están `Player` y la `Mob`. Abre `player.tscn` haciendo doble clic en el archivo en el dock _FileSystem_.
 
-Selecciona el nodo _Player_ y establece su _Collision > Mask_ en "enemies" y "world". Puedes dejar la propiedad predeterminada _Layer_ como está, porque la primera capa es la capa "player".
+Selecciona el nodo _Player_ y establece su _CollisionObject3D > Collision > Mask_ en "enemies" y "world". Puedes dejar la propiedad predeterminada _Layer_ como está, porque la primera capa es la capa "player".
 
 ![07.player_physics_mask](./img/07.player_physics_mask.webp)
 
 Luego, abre la escena `Mob` haciendo doble clic en `mob.tscn` y selecciona el nodo **Mob**.
 
-Configura su _Collision > Layer_ en "enemies" y desconfigura su _Collision > Mask_, dejando la máscara vacía.
+Configura su _CollisionObject3D > Collision > Layer_ en "enemies" y desconfigura su _CollisionObject3D > Collision > Mask_, dejando la máscara vacía.
 
 ![08.mob_physics_mask](./img/08.mob_physics_mask.webp)
+
+Nos quedará el siguiente mapa de asignaciones de colisión de capas y máscaras:
+
+```
+Layer
+=====
+1> player	(Player)
+2> enemies	(Mob)
+3> world	(Ground)
+
+Mask
+====
+1> player	()
+2> enemies	(Player)
+3> world	(Player)
+```
 
 Estas configuraciones significan que los mobs se moverán entre sí. Si quieres que los mobs colisionen y se deslicen entre sí, **activa** la máscara "enemies".
 
@@ -973,9 +989,9 @@ Necesitamos detectar colisiones con un mob y diferenciarlas de las colisiones co
 
 Abre la escena `mob.tscn` nuevamente y selecciona el nodo `Mob`. Vaya al dock _Node_ a la derecha para ver una lista de _señales_. El dock _Node_ tiene dos pestañas: _Signals_, que ya ha utilizado, y _Groups_, que le permite asignar etiquetas a los nodos.
 
-Haga clic en él para revelar un campo donde puedas escribir un _nombre de etiqueta_. Ingrese `mob` en el campo y haga clic en el botón _Add_.
+Haga clic en el botón `+` _(add a new group)_ para abrir la ventana _Create New Group_. En el campo _Name_ ingrese `mob` (no hace falta seleccionar la opción _Global_) y por último clic en _OK_.
 
-![09-jumping-squashing-mobs](./img/09-jumping-squashing-mobs.webp)
+![09-jumping-squashing-mobs](./img/mob_group.png)
 
 Aparece un ícono en el dock _Scene_ para indicar que el nodo es parte de al menos un grupo.
 
@@ -1064,7 +1080,7 @@ Con eso, deberías poder matar monstruos saltando sobre ellos. Puedes presionar 
 
 Sin embargo, el jugador no morirá todavía. Trabajaremos en eso en la próxima parte.
 
-### Muerte del jugador
+### 7. Muerte del jugador
 
 Podemos matar enemigos saltando sobre ellos, pero el jugador no puede morir. Vamos a solucionar esto.
 
@@ -1088,11 +1104,11 @@ También quieres que el cilindro sea más ancho que la esfera. De esta manera, e
 
 Cuanto más ancho sea el cilindro, más fácilmente morirá el jugador.
 
-A continuación, selecciona el nodo `MobDetector` nuevamente y, en _Inspector_, **desactiva** su propiedad _Monitorable_. Esto hace que otros nodos de física no puedan detectar el área. La propiedad complementaria _Monitoring_ le permite detectar colisiones. Luego, elimina _Collision -> Layer_ y establece _Mask_ en la capa "enemies".
+A continuación, selecciona el nodo `MobDetector` nuevamente y, en _Inspector_, **desactiva** su propiedad _Monitorable_. Esto hace que otros nodos de física no puedan detectar el área. La propiedad complementaria _Monitoring_ le permite detectar colisiones. Luego, elimina _CollisionObject3D > Collision > Layer_ y establece _CollisionObject3D > Collision > Mask_ en la capa "enemies".
 
 ![04.mob_detector_properties](./img/04.mob_detector_properties.webp)
 
-Cuando las áreas detectan una colisión, emiten señales. Vamos a conectar una al nodo `Player`. Selecciona `MobDetector` y ve a la pestaña _Nodo_ de _Inspector_, haz doble clic en la señal `body_entered` y conéctala a `Player`.
+Cuando las áreas detectan una colisión, emiten señales. Vamos a conectar una al nodo `Player`. Selecciona `MobDetector` y ve a la pestaña _Nodo_ de _Inspector_, haz doble clic en la señal `Area3D > body_entered` y conéctala a `Player`.
 
 ![05-killing-player](./img/05-killing-player.webp)
 
@@ -1303,7 +1319,7 @@ func _on_mob_detector_body_entered(body):
 
 Nos vemos en la próxima lección para agregar la puntuación y la opción de reintentar.
 
-### Puntuación y repetición
+### 8. Puntuación y repetición
 
 En esta parte, agregaremos la puntuación, la reproducción de música y la capacidad de reiniciar el juego.
 
@@ -1333,11 +1349,11 @@ El nodo `UserInterface` nos permite agrupar nuestra IU en una rama del árbol de
 
 #### Creación de un tema de IU
 
-Una vez más, seleccione el nodo `UserInterface`. En **Inspector**, cree un nuevo recurso de tema en _Theme > Theme_.
+Una vez más, seleccione el nodo `UserInterface`. En **Inspector**, cree un nuevo recurso de tema en _Theme > New Theme_.
 
 ![05-score-replay](./img/05-score-replay.webp)
 
-Haga clic en él para abrir el editor de temas en el panel inferior. Le ofrece una vista previa de cómo se verán todos los widgets de IU integrados con su recurso de tema.
+Haga doble clic en _Theme > Theme_ para abrir el _editor de temas_ en el panel inferior. Le ofrece una vista previa de cómo se verán todos los widgets de IU integrados con su recurso de tema.
 
 ![06-score-replay](./img/06-score-replay.webp)
 
@@ -1357,7 +1373,7 @@ El texto es un poco pequeño. Establezca el _Default Font Size_ en `22` píxeles
 
 #### Seguimiento de la puntuación
 
-Trabajemos ahora en la puntuación. Adjunte un nuevo script a `ScoreLabel` y defina la variable `score`.
+Trabajemos ahora en la puntuación. Adjunte un nuevo script a `ScoreLabel` y defina la variable `score`. Guardelo como `ScoreLabel.gd`.
 
 ```
 extends Label
@@ -1385,7 +1401,7 @@ func _on_mob_timer_timeout():
 ```
 Esta línea significa que cuando el mob emite la señal `squashed`, el nodo `ScoreLabel` la recibirá y llamará a la función `_on_mob_squashed()`.
 
-Regrese al script `score_label.gd` para definir la función callback `_on_mob_squashed()`.
+Regrese al script `ScoreLabel.gd` para definir la función callback `_on_mob_squashed()`.
 
 Allí, incrementamos la puntuación y actualizamos el texto mostrado.
 
@@ -1553,7 +1569,7 @@ func _unhandled_input(event):
     get_tree().reload_current_scene()
 ```
 
-### Animación de personajes
+### 9. Animación de personajes
 
 En esta última lección, utilizaremos las herramientas integradas de animación  de Godot para hacer que nuestros personajes floten y se agiten. Aprenderás a diseñar animaciones en el editor y a usar código para que tu juego parezca más vivo.
 
@@ -1888,7 +1904,7 @@ func squash():
   queue_free() # Destroy this node
 ```
 
-### Más allá
+### 10. Más allá
 
 Puedes darte una palmadita en la espalda por haber completado tu primer juego en 3D con Godot.
 

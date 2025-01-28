@@ -51,15 +51,15 @@ Puedes descargarlos haciendo clic en el enlace a continuación.
 
 ### Contenido
 
-- Configuración del proyecto
-- Creación de la escena del jugador
-- Codificación del jugador
-- Creación del enemigo
-- La escena principal del juego
-- Pantalla de visualización frontal
-- Finalización
+1. [Configuración del proyecto](#1-configuración-del-proyecto)
+2. [Creación de la escena del jugador](#2-creación-de-la-escena-del-jugador)
+3. [Codificación del jugador](#3-código-del-jugador)
+4. [Creación del enemigo](#4-creación-del-enemigo)
+5. [La escena `Main` del juego](#5-la-escena-main-del-juego)
+6. [Creación de la HUD](#6-creación-de-la-hud)
+7. [Terminando](#7-terminando)
 
-### Configuración del proyecto
+### 1. Configuración del proyecto
 
 En esta breve primera parte, configuraremos y organizaremos el proyecto.
 
@@ -93,7 +93,7 @@ En un proyecto más grande, puede ser útil crear carpetas para almacenar las di
 
 Con el proyecto en marcha, estamos listos para diseñar la escena del jugador en la próxima lección.
 
-### Creación de la escena del jugador
+### 2. Creación de la escena del jugador
 
 Una vez que hayamos configurado el proyecto, podemos empezar a trabajar en el personaje controlado por el jugador.
 
@@ -157,7 +157,7 @@ Asegúrate de guardar la escena nuevamente después de estos cambios.
 
 En la siguiente parte, agregaremos un **script** al nodo del jugador para moverlo y animarlo. Luego, configuraremos la detección de colisiones para saber cuándo el jugador fue golpeado por algo.
 
-### Código del jugador
+### 3. Código del jugador
 
 En esta lección, agregaremos movimiento y animación al jugador y lo configuraremos para detectar colisiones.
 
@@ -373,7 +373,7 @@ func start(pos):
 
 Con el jugador ya funcionando, en la siguiente lección trabajaremos en el enemigo.
 
-### Creando al enemigo
+### 4. Creación del enemigo
 
 Ahora es el momento de crear a los **mobs** (mobile, equivalente a _hostile NPC_ (Hostile Non-Playable Character)) que nuestro jugador tendrá que esquivar. Su comportamiento no será muy complejo: los _mobs_ aparecerán aleatoriamente en los bordes de la pantalla, elegirán una dirección aleatoria y se moverán en línea recta.
 
@@ -445,7 +445,7 @@ Esto completa la escena `Mob`.
 
 Con el jugador y los enemigos listos, en la siguiente parte los reuniremos en una nueva escena. Haremos que los enemigos aparezcan aleatoriamente alrededor del tablero de juego y avanzaremos, convirtiendo nuestro proyecto en un juego jugable.
 
-### La escena `Main` del juego
+### 5. La escena `Main` del juego
 
 Ahora es momento de reunir todo lo que hicimos en una escena de juego jugable.
 
@@ -603,7 +603,7 @@ Cuando estés seguro de que todo funciona, elimina la llamada a `new_game()` de 
 
 ¿Qué le falta a nuestro juego? Un poco de _interfaz de usuario_. En la próxima lección, agregaremos una _pantalla de título_ y mostraremos el _puntaje del jugador_.
 
-### Pantalla de visualización frontal (HUD, heads-up display)
+### 6. Creación de la HUD
 
 La última pieza que necesita nuestro juego es una _interfaz de usuario (IU)_ para mostrar elementos como la puntuación, un mensaje de "game over" y un botón de reinicio.
 
@@ -785,7 +785,7 @@ La función `call_group()` llama a la función nombrada en cada nodo de un grupo
 
 El juego está prácticamente terminado en este punto. En la próxima y última parte, lo perfeccionaremos un poco agregando un fondo, música en bucle y algunos atajos de teclado.
 
-### Terminando
+### 7. Terminando
 
 Ya hemos completado todas las funciones de nuestro juego. A continuación, se muestran algunos pasos restantes para agregar un poco más de "jugo" para mejorar la experiencia de juego.
 
