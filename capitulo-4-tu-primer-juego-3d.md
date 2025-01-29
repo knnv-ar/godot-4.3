@@ -1128,7 +1128,7 @@ func die():
   queue_free()
 
 
-func _on_mob_detector_body_entered(body):
+func _on_mob_detector_body_entered(_body):
   die()
 ```
 
@@ -1313,7 +1313,7 @@ func die():
   hit.emit()
   queue_free()
 
-func _on_mob_detector_body_entered(body):
+func _on_mob_detector_body_entered(_body):
   die()
 ```
 
@@ -1501,11 +1501,11 @@ Crea una nueva escena yendo al menú _Scene_ y haciendo clic en _New Scene_ o ut
 
 Haz clic en el botón _Other Node_ y crea un nodo **AudioStreamPlayer**. Cámbiale el nombre a `MusicPlayer`.
 
-![16-score-replay](./img/16-score-replay.webp)
+![16-score-replay](./img/16-score-replay.png)
 
 Incluimos una banda sonora musical en el directorio `art/`: `House In a Forest Loop.ogg`. Haz clic y arrástralo a la propiedad _Stream_ en _Inspector_. Además, activa _Autoplay_ para que la música se reproduzca automáticamente al inicio del juego.
 
-![17-score-replay](./img/17-score-replay.webp)
+![17-score-replay](./img/17-score-replay.png)
 
 Guarda la escena como `music_player.tscn`.
 
@@ -1749,9 +1749,9 @@ Aquí hay otro truco interesante con las animaciones en Godot: siempre que uses 
 
 Por ejemplo, tanto las escenas `Mob` como `Player` tienen un nodo `Pivot` y un nodo `Character`, por lo que podemos reutilizar animaciones entre ellas.
 
-Abre la escena `Player`, selecciona el nodo **AnimationPlayer** y haz clic en _Animation > Manage Animations..._ Haz clic en el botón _Copy animation to clipboard_ (dos cuadrados pequeños) junto a la animación _float_. Haz clic en _OK_ para cerrar la ventana.
+Abre la escena `Player`, selecciona el nodo **AnimationPlayer** y haz clic en _Animation Panel > Animation button > Manage Animations..._ Haz clic en el botón _Copy animation to clipboard_ (dos cuadrados superpuestos pequeños) junto a la animación _float_. Haz clic en _OK_ para cerrar la ventana.
 
-A continuación, abre `mob.tscn`, crea un nodo hijo [**AnimationPlayer**](https://docs.godotengine.org/en/stable/classes/class_animationplayer.html#class-animationplayer) y selecciónalo. Haz clic en **Animation > Manage Animations** y, a continuación, en **Add Library**. Deberías ver el mensaje _"Global library will be created"_. Deja el campo de texto en blanco y haz clic en _OK_. Haz clic en el icono _Paste_ (portapapeles) y debería aparecer en la ventana. Haz clic en _OK_Aceptar para cerrar la ventana.
+A continuación, abre `mob.tscn`, crea un nodo hijo [**AnimationPlayer**](https://docs.godotengine.org/en/stable/classes/class_animationplayer.html#class-animationplayer) y selecciónalo. Haz clic en **Animation Panel > Animation button > Manage Animations** y, a continuación, en **New Library**. Deja el campo de texto en blanco. También deberías ver el mensaje _"Global library will be created"_.  Por último haz clic en _OK_. Luego haz clic en el icono _Paste animation to library from clipboard_ y debería aparecer en la ventana una copia de la animación _float_. Haz clic en _OK_ para cerrar la ventana.
 
 A continuación, asegúrate de que el botón _reproducción automática_ (Autoplay: [autoplay_button](./img/autoplay_button.webp)) y las flechas de bucle (Animation looping) también estén activados en el editor de animación del panel inferior. Eso es todo; todos los _mobs_ reproducirán ahora la animación _float_.
 
@@ -1857,7 +1857,7 @@ func die():
   hit.emit()
   queue_free()
 
-func _on_mob_detector_body_entered(body):
+func _on_mob_detector_body_entered(_body):
   die()
 ```
 
