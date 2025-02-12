@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://bqd5bc22lhtog"]
+
+[ext_resource type="Script" path="res://vjoystick/vjoystick.gd" id="1_33evu"]
+[ext_resource type="Texture2D" uid="uid://bsk6brek18lak" path="res://assets/joyPath-wh.svg" id="1_uxsw3"]
+[ext_resource type="Texture2D" uid="uid://wwvu7tge6u74" path="res://assets/joyKnob-wh.svg" id="2_eyq7w"]
+[ext_resource type="Script" path="res://vjoystick/joy_knob_wh.gd" id="4_g47lj"]
+
+[node name="vjoystick" type="Node2D"]
+script = ExtResource("1_33evu")
+
+[node name="JoyPath-wh" type="Sprite2D" parent="."]
+texture = ExtResource("1_uxsw3")
+
+[node name="JoyKnob-wh" type="Sprite2D" parent="."]
+texture = ExtResource("2_eyq7w")
+script = ExtResource("4_g47lj")
+
+[node name="Button" type="Button" parent="."]
+self_modulate = Color(1, 1, 1, 0)
+offset_left = -32.0
+offset_top = -64.0
+offset_right = 32.0
+offset_bottom = 64.0
+metadata/_edit_use_anchors_ = true
+
+[connection signal="button_down" from="Button" to="JoyKnob-wh" method="_on_button_button_down"]
+[connection signal="button_up" from="Button" to="JoyKnob-wh" method="_on_button_button_up"]

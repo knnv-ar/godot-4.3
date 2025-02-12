@@ -11,7 +11,7 @@ var player_score = 0
 var computer_score = 0
 
 # Area izquierda
-func _on_goal_left_body_entered(body):
+func _on_goal_left_body_entered(_body):
 	computer_score += 1
 	# computer_score contiene un dato int, por lo tanto
 	# lo envolvemos con un str() para que text lo acepte
@@ -19,7 +19,7 @@ func _on_goal_left_body_entered(body):
 	reset()
 
 # Area derecha
-func _on_goal_right_body_entered(body):
+func _on_goal_right_body_entered(_body):
 	player_score += 1
 	# computer_score contiene un dato int, por lo tanto
 	# lo envolvemos con un str() para que text lo acepte

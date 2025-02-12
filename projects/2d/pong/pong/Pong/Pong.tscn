@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cs41jd53u2on4"]
+[gd_scene load_steps=13 format=3 uid="uid://cs41jd53u2on4"]
 
 [ext_resource type="Script" path="res://Pong/Pong.gd" id="1_6t8ll"]
 [ext_resource type="PackedScene" uid="uid://bh34ythhdfb7t" path="res://Player/Player.tscn" id="1_o6d5m"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://yk0r628i8ttt" path="res://assets/wall-vertical.png" id="6_gos85"]
 [ext_resource type="Texture2D" uid="uid://c1t8ee1ggwtpg" path="res://assets/middle-line.png" id="7_xp5o8"]
 [ext_resource type="FontFile" uid="uid://wb03aqo1awhx" path="res://assets/alarm-clock.ttf" id="8_bwemq"]
+[ext_resource type="PackedScene" uid="uid://bqd5bc22lhtog" path="res://vjoystick/vjoystick.tscn" id="9_u66w1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_olbi2"]
 size = Vector2(1188, 20)
@@ -88,6 +89,9 @@ text = "0"
 label_settings = SubResource("LabelSettings_7d28m")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="vjoystick" parent="." instance=ExtResource("9_u66w1")]
+position = Vector2(377, 583)
 
 [connection signal="body_entered" from="GoalLeft" to="." method="_on_goal_left_body_entered"]
 [connection signal="body_entered" from="GoalRight" to="." method="_on_goal_right_body_entered"]

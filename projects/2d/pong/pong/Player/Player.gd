@@ -1,15 +1,16 @@
 extends CharacterBody2D
 
+@onready var vjoystick: Node2D = $"../vjoystick"
+
 var speed = 500
 
 func _process(delta):
-	velocity.y = 0
+	var direction_y = vjoystick.posVector.y
 	
 	if Input.is_action_pressed("ui_up"):
-		velocity.y = -1
+		direction_y = -1
 	elif Input.is_action_pressed("ui_down"):
-		velocity.y = 1
+		direction_y = 1
 	
-	velocity.y *= speed
-	
+	velocity.y = direction_y * speed
 	move_and_collide(velocity * delta)
